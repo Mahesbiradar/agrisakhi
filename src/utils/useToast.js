@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { createElement, useEffect, useState } from 'react'
 import Toast from '../components/Toast.jsx'
 
 export function useToast() {
@@ -31,9 +31,12 @@ export function useToast() {
     })
   }
 
-  const ToastComponent = () => (
-    <Toast message={toast.message} type={toast.type} visible={toast.visible} />
-  )
+  const ToastComponent = () =>
+    createElement(Toast, {
+      message: toast.message,
+      type: toast.type,
+      visible: toast.visible,
+    })
 
   return { showToast, ToastComponent }
 }

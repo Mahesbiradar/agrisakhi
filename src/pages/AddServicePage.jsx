@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useData } from '../context/DataContext.jsx'
+import { useToast } from '../utils/useToast.js'
 
 const partyEmoji = '\u{1F389}'
 
@@ -18,7 +19,8 @@ export default function AddServicePage() {
   const navigate = useNavigate()
   const { currentUser } = useAuth()
   const { addService } = useData()
-  const [showToast, setShowToast] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const { showToast, ToastComponent } = useToast()
   const [formData, setFormData] = useState({
     serviceName: '',
     category: 'machinery',
@@ -29,7 +31,7 @@ export default function AddServicePage() {
   })
 
   useEffect(() => {
-    if (!showToast) {
+    if (!submitted) {
       return undefined
     }
 
@@ -38,7 +40,7 @@ export default function AddServicePage() {
     }, 1400)
 
     return () => window.clearTimeout(timeoutId)
-  }, [navigate, showToast])
+  }, [navigate, submitted])
 
   const updateField = (field, value) => {
     setFormData((current) => ({
@@ -65,7 +67,8 @@ export default function AddServicePage() {
       category: formData.category,
     })
 
-    setShowToast(true)
+    showToast(`Service listed! Farmers nearby can now see you ${partyEmoji}`)
+    setSubmitted(true)
   }
 
   return (
@@ -242,11 +245,7 @@ export default function AddServicePage() {
         </button>
       </form>
 
-      {showToast ? (
-        <div className="fixed inset-x-0 top-4 z-30 mx-auto w-[calc(100%-2rem)] max-w-[398px] rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-2xl">
-          Service listed! Farmers nearby can now see you {partyEmoji}
-        </div>
-      ) : null}
+      <ToastComponent />
     </div>
   )
 }

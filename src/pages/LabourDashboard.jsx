@@ -6,9 +6,10 @@ import {
   Settings2,
   SlidersHorizontal,
   SunMedium,
-  X,
 } from 'lucide-react'
 import { useState } from 'react'
+import BottomSheet from '../components/BottomSheet.jsx'
+import JobCard from '../components/JobCard.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useData } from '../context/DataContext.jsx'
 import { getNearby } from '../utils/location.js'
@@ -18,32 +19,6 @@ const waveEmoji = '\u{1F44B}'
 const workTypeOptions = ['all', 'harvesting', 'planting', 'irrigation', 'spraying', 'other']
 const distanceOptions = [10, 25, 50, 100]
 const minWageOptions = [300, 400, 500]
-
-const workTypeStyles = {
-  harvesting: 'bg-green-100 text-green-700',
-  planting: 'bg-sky-100 text-sky-700',
-  irrigation: 'bg-cyan-100 text-cyan-700',
-  spraying: 'bg-lime-100 text-lime-700',
-  other: 'bg-slate-100 text-slate-700',
-}
-
-function formatRelativeTime(value) {
-  const diffMs = Date.now() - new Date(value).getTime()
-  const diffDays = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)))
-
-  if (diffDays < 7) {
-    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`
-  }
-
-  const diffWeeks = Math.floor(diffDays / 7)
-
-  if (diffWeeks < 5) {
-    return `${diffWeeks} week${diffWeeks === 1 ? '' : 's'} ago`
-  }
-
-  const diffMonths = Math.floor(diffDays / 30)
-  return `${diffMonths} month${diffMonths === 1 ? '' : 's'} ago`
-}
 
 function formatToday() {
   return new Date().toLocaleDateString('en-IN', {
@@ -176,45 +151,8 @@ export default function LabourDashboard() {
       <section className="space-y-3">
         {visibleJobs.length > 0 ? (
           visibleJobs.map((job) => (
-            <article
-              key={job.id}
-              className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    workTypeStyles[job.workType] ?? workTypeStyles.other
-                  }`}
-                >
-                  {job.workType}
-                </span>
-                <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
-                  {job.distanceKm} km away
-                </span>
-              </div>
-
-              <h2 className="mt-4 text-lg font-semibold leading-7 text-slate-900">{job.title}</h2>
-
-              <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
-                <MapPin className="h-4 w-4" />
-                <span>
-                  {job.farmerName} / {job.village}
-                </span>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                  INR {job.wage}/day
-                </span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                  {job.duration}
-                </span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                  Posted {formatRelativeTime(job.postedAt)}
-                </span>
-              </div>
-
-              <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
+            <JobCard key={job.id} job={job} showDistance>
+              <div className="grid grid-cols-[1fr_auto] gap-2">
                 <a
                   href={`tel:${formatPhone(job.contactPhone)}`}
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-900"
@@ -231,7 +169,7 @@ export default function LabourDashboard() {
                   <MessageCircle className="h-4 w-4" />
                 </a>
               </div>
-            </article>
+            </JobCard>
           ))
         ) : (
           <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
@@ -242,33 +180,13 @@ export default function LabourDashboard() {
         )}
       </section>
 
-      {showFilters ? (
-        <div className="fixed inset-0 z-40 bg-slate-950/35">
-          <button
-            type="button"
-            aria-label="Close filters"
-            onClick={() => setShowFilters(false)}
-            className="absolute inset-0 h-full w-full"
-          />
+      <BottomSheet isOpen={showFilters} onClose={() => setShowFilters(false)} title="Filters">
+        <div className="flex items-center gap-2">
+          <Settings2 className="h-5 w-5 text-amber-700" />
+          <p className="text-sm font-medium text-slate-500">Refine nearby jobs</p>
+        </div>
 
-          <div className="absolute bottom-0 left-1/2 w-full max-w-[430px] -translate-x-1/2 rounded-t-[32px] bg-white px-5 pb-8 pt-5 shadow-2xl">
-            <div className="mx-auto h-1.5 w-14 rounded-full bg-slate-200" />
-
-            <div className="mt-5 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Settings2 className="h-5 w-5 text-amber-700" />
-                <h2 className="text-lg font-bold text-slate-900">Filters</h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowFilters(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="mt-6">
+        <div className="mt-6">
               <p className="text-sm font-semibold text-slate-700">Work Type</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {workTypeOptions.map((workType) => {
@@ -294,9 +212,9 @@ export default function LabourDashboard() {
                   )
                 })}
               </div>
-            </div>
+        </div>
 
-            <div className="mt-6">
+        <div className="mt-6">
               <p className="text-sm font-semibold text-slate-700">Distance</p>
               <div className="mt-3 grid grid-cols-4 gap-2">
                 {distanceOptions.map((distance) => (
@@ -314,9 +232,9 @@ export default function LabourDashboard() {
                   </button>
                 ))}
               </div>
-            </div>
+        </div>
 
-            <div className="mt-6">
+        <div className="mt-6">
               <p className="text-sm font-semibold text-slate-700">Min Wage</p>
               <div className="mt-3 grid grid-cols-3 gap-2">
                 {minWageOptions.map((wage) => (
@@ -332,18 +250,16 @@ export default function LabourDashboard() {
                   </button>
                 ))}
               </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowFilters(false)}
-              className="mt-8 w-full rounded-2xl bg-slate-900 px-4 py-4 text-sm font-semibold text-white"
-            >
-              Apply Filters
-            </button>
-          </div>
         </div>
-      ) : null}
+
+        <button
+          type="button"
+          onClick={() => setShowFilters(false)}
+          className="mt-8 w-full rounded-2xl bg-slate-900 px-4 py-4 text-sm font-semibold text-white"
+        >
+          Apply Filters
+        </button>
+      </BottomSheet>
     </div>
   )
 }
