@@ -6,17 +6,22 @@ import {
   Users,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import PageSkeleton from '../components/PageSkeleton.jsx'
 import ServiceCard from '../components/ServiceCard.jsx'
 import UserCard from '../components/UserCard.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useData } from '../context/DataContext.jsx'
 import { getNearby } from '../utils/location.js'
+import { useDelayedLoading } from '../utils/useDelayedLoading.js'
 
 const waveEmoji = '\u{1F44B}'
+const labourEmoji = '\u{1F477}'
+const serviceEmoji = '\u{1F69C}'
 
 export default function FarmerDashboard() {
   const { currentUser } = useAuth()
   const { users, services } = useData()
+  const loading = useDelayedLoading()
 
   const nearbyLabour = getNearby(
     users.filter((user) => user.role === 'labour'),
@@ -26,6 +31,10 @@ export default function FarmerDashboard() {
   )
 
   const nearbyServices = getNearby(services, currentUser.lat, currentUser.lng, 60)
+
+  if (loading) {
+    return <PageSkeleton variant="dashboard" />
+  }
 
   return (
     <div className="space-y-6 pb-4">
@@ -88,8 +97,9 @@ export default function FarmerDashboard() {
             ))}
           </div>
         ) : (
-          <div className="mt-4 rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-500">
-            No results nearby. Try expanding your search area.
+          <div className="mt-4 rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
+            <p className="text-4xl">{labourEmoji}</p>
+            <p className="mt-3 text-base font-semibold text-slate-800">No labourers nearby</p>
           </div>
         )}
       </section>
@@ -107,8 +117,9 @@ export default function FarmerDashboard() {
             ))}
           </div>
         ) : (
-          <div className="mt-4 rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-500">
-            No results nearby. Try expanding your search area.
+          <div className="mt-4 rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
+            <p className="text-4xl">{serviceEmoji}</p>
+            <p className="mt-3 text-base font-semibold text-slate-800">No services listed</p>
           </div>
         )}
       </section>

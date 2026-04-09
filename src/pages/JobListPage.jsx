@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import JobCard from '../components/JobCard.jsx'
+import PageSkeleton from '../components/PageSkeleton.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useData } from '../context/DataContext.jsx'
+import { useDelayedLoading } from '../utils/useDelayedLoading.js'
 
 const filters = [
   { label: 'All', value: 'all' },
@@ -13,12 +15,17 @@ export default function JobListPage() {
   const { currentUser } = useAuth()
   const { jobs } = useData()
   const [activeFilter, setActiveFilter] = useState('all')
+  const loading = useDelayedLoading()
 
   const farmerJobs = jobs.filter((job) => job.farmerId === currentUser.id)
   const filteredJobs =
     activeFilter === 'all'
       ? farmerJobs
       : farmerJobs.filter((job) => job.status.toLowerCase() === activeFilter)
+
+  if (loading) {
+    return <PageSkeleton variant="list" />
+  }
 
   return (
     <div className="space-y-6">
@@ -52,10 +59,9 @@ export default function JobListPage() {
         </div>
       ) : (
         <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
-          <p className="text-base font-semibold text-slate-800">No jobs posted yet</p>
-          <p className="mt-2 text-sm text-slate-500">
-            Your posted jobs will appear here once you create your first hiring request.
-          </p>
+          <p className="text-4xl">{'\u{1F33E}'}</p>
+          <p className="mt-3 text-base font-semibold text-slate-800">No jobs found</p>
+          <p className="mt-2 text-sm text-slate-500">Your posted jobs will appear here once you add one.</p>
         </div>
       )}
     </div>

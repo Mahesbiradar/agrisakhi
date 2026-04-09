@@ -65,7 +65,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="max-w-[430px] mx-auto min-h-screen bg-gradient-to-b from-green-50 via-white to-white relative">
+    <div className="page-container bg-gradient-to-b from-green-50 via-white to-white">
       <div className="px-5 pb-8 pt-6">
         <div className="flex items-center justify-between">
           <button

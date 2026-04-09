@@ -11,26 +11,20 @@ import {
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomSheet from '../components/BottomSheet.jsx'
+import PageSkeleton from '../components/PageSkeleton.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useData } from '../context/DataContext.jsx'
+import { getRoleColor } from '../utils/roleColors.js'
+import { useDelayedLoading } from '../utils/useDelayedLoading.js'
 import { useToast } from '../utils/useToast.js'
 
 const languageStorageKey = 'agrisakhi_language'
 const kannadaLabel = '\u0C95\u0CA8\u0CCD\u0CA8\u0CA1'
 
 const roleMeta = {
-  farmer: {
-    badge: 'Farmer',
-    avatarClass: 'bg-green-100 text-green-700',
-  },
-  labour: {
-    badge: 'Labour',
-    avatarClass: 'bg-amber-100 text-amber-700',
-  },
-  provider: {
-    badge: 'Service Provider',
-    avatarClass: 'bg-blue-100 text-blue-700',
-  },
+  farmer: { badge: 'Farmer' },
+  labour: { badge: 'Labour' },
+  provider: { badge: 'Service Provider' },
 }
 
 function formatMemberSince(value) {
@@ -72,8 +66,10 @@ export default function ProfilePage() {
   const [readyToWork, setReadyToWork] = useState(() =>
     readStoredFlag(getReadyKey(currentUser.id), true),
   )
+  const loading = useDelayedLoading()
 
   const meta = roleMeta[currentUser.role] ?? roleMeta.farmer
+  const roleColor = getRoleColor(currentUser.role)
   const farmerJobsCount = useMemo(
     () => jobs.filter((job) => job.farmerId === currentUser.id).length,
     [currentUser.id, jobs],
@@ -100,17 +96,23 @@ export default function ProfilePage() {
     navigate('/', { replace: true })
   }
 
+  if (loading) {
+    return <PageSkeleton variant="profile" />
+  }
+
   return (
     <div className="space-y-6 pb-6">
       <section className="rounded-[28px] border border-slate-200 bg-white px-5 py-6 shadow-sm">
         <div className="flex flex-col items-center text-center">
           <div
-            className={`flex h-24 w-24 items-center justify-center rounded-full text-4xl font-black ${meta.avatarClass}`}
+            className={`flex h-24 w-24 items-center justify-center rounded-full text-4xl font-black ${roleColor.light} ${roleColor.text}`}
           >
             {currentUser.avatar}
           </div>
           <h1 className="mt-4 text-2xl font-black text-slate-900">{currentUser.name}</h1>
-          <div className="mt-3 inline-flex rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+          <div
+            className={`mt-3 inline-flex rounded-full border px-4 py-2 text-sm font-semibold ${roleColor.light} ${roleColor.text} ${roleColor.border}`}
+          >
             {meta.badge}
           </div>
           <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600">

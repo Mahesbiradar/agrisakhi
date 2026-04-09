@@ -10,11 +10,14 @@ import {
 import { useState } from 'react'
 import BottomSheet from '../components/BottomSheet.jsx'
 import JobCard from '../components/JobCard.jsx'
+import PageSkeleton from '../components/PageSkeleton.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useData } from '../context/DataContext.jsx'
 import { getNearby } from '../utils/location.js'
+import { useDelayedLoading } from '../utils/useDelayedLoading.js'
 
 const waveEmoji = '\u{1F44B}'
+const jobEmoji = '\u{1F33E}'
 
 const workTypeOptions = ['all', 'harvesting', 'planting', 'irrigation', 'spraying', 'other']
 const distanceOptions = [10, 25, 50, 100]
@@ -40,6 +43,7 @@ export default function LabourDashboard() {
   const [selectedDistance, setSelectedDistance] = useState(50)
   const [selectedWorkTypes, setSelectedWorkTypes] = useState(['all'])
   const [minWage, setMinWage] = useState(300)
+  const loading = useDelayedLoading()
 
   const nearbyOpenJobs = getNearby(
     jobs.filter((job) => job.status === 'open'),
@@ -74,6 +78,10 @@ export default function LabourDashboard() {
 
       return [...withoutAll, workType]
     })
+  }
+
+  if (loading) {
+    return <PageSkeleton variant="list" />
   }
 
   return (
@@ -173,9 +181,9 @@ export default function LabourDashboard() {
           ))
         ) : (
           <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
-            <p className="text-base font-semibold text-slate-800">
-              No jobs found nearby. Try increasing search radius.
-            </p>
+            <p className="text-4xl">{jobEmoji}</p>
+            <p className="mt-3 text-base font-semibold text-slate-800">No jobs found</p>
+            <p className="mt-2 text-sm text-slate-500">Try increasing search radius.</p>
           </div>
         )}
       </section>

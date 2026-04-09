@@ -1,9 +1,11 @@
 import { CirclePlus, MapPin, PenSquare, Sparkles, Wrench } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import PageSkeleton from '../components/PageSkeleton.jsx'
 import ServiceCard from '../components/ServiceCard.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useData } from '../context/DataContext.jsx'
+import { useDelayedLoading } from '../utils/useDelayedLoading.js'
 import { useToast } from '../utils/useToast.js'
 
 const waveEmoji = '\u{1F44B}'
@@ -13,11 +15,16 @@ export default function ProviderDashboard() {
   const { currentUser } = useAuth()
   const { services } = useData()
   const { showToast, ToastComponent } = useToast()
+  const loading = useDelayedLoading()
 
   const myServices = useMemo(
     () => services.filter((service) => service.providerId === currentUser.id),
     [currentUser.id, services],
   )
+
+  if (loading) {
+    return <PageSkeleton variant="list" />
+  }
 
   return (
     <div className="space-y-6 pb-24">
@@ -90,9 +97,11 @@ export default function ProviderDashboard() {
             ))}
           </div>
         ) : (
-          <div className="mt-4 rounded-[28px] border border-dashed border-blue-200 bg-blue-50 p-5">
-            <p className="text-lg font-semibold text-slate-900">
-              You haven&apos;t listed any services yet. Add your first service so farmers can find you! {tractorEmoji}
+          <div className="mt-4 rounded-[28px] border border-dashed border-blue-200 bg-blue-50 p-5 text-center">
+            <p className="text-5xl">{tractorEmoji}</p>
+            <p className="mt-3 text-lg font-semibold text-slate-900">No services listed</p>
+            <p className="mt-2 text-sm text-slate-600">
+              Add your first service so farmers can find you nearby.
             </p>
             <Link
               to="/provider/add-service"

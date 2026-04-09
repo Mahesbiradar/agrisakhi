@@ -32,7 +32,7 @@ export default function LandingPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="max-w-[430px] mx-auto min-h-screen bg-white relative overflow-hidden">
+    <div className="page-container overflow-hidden bg-white">
       <div className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-green-50 to-white" />
       <div className="relative flex min-h-screen flex-col px-5 pb-8 pt-7">
         <div className="flex items-center gap-3">

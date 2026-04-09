@@ -15,7 +15,7 @@ export default function ProtectedRoute({ children, role }) {
   }
 
   return (
-    <div className="max-w-[430px] mx-auto min-h-screen bg-white relative">
+    <div className="page-container">
       <div className="min-h-screen px-4 pb-24 pt-4">{children}</div>
       <BottomNav />
     </div>
