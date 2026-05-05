@@ -1,6 +1,7 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import AddServicePage from './pages/AddServicePage.jsx'
+import JobDetailPage from './pages/JobDetailPage.jsx'
 import FarmerDashboard from './pages/FarmerDashboard.jsx'
 import JobListPage from './pages/JobListPage.jsx'
 import LabourDashboard from './pages/LabourDashboard.jsx'
@@ -72,6 +73,14 @@ function App() {
           element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jobs/:id"
+          element={
+            <ProtectedRoute>
+              <JobDetailPage />
             </ProtectedRoute>
           }
         />

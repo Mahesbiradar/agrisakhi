@@ -1,17 +1,17 @@
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext.jsx'
+import useAuthStore from '../store/authStore.js'
 import { getDashboardPath } from '../utils/auth.js'
 import BottomNav from './BottomNav.jsx'
 
 export default function ProtectedRoute({ children, role }) {
-  const { currentUser, isLoggedIn } = useAuth()
+  const { isLoggedIn, user } = useAuthStore()
 
-  if (!isLoggedIn || !currentUser) {
+  if (!isLoggedIn || !user) {
     return <Navigate to="/login" replace />
   }
 
-  if (role && currentUser.role !== role) {
-    return <Navigate to={getDashboardPath(currentUser.role)} replace />
+  if (role && user.role !== role) {
+    return <Navigate to={getDashboardPath(user.role)} replace />
   }
 
   return (

@@ -1,7 +1,8 @@
 import { BriefcaseBusiness, CirclePlus, Home, User } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext.jsx'
+import useAuthStore from '../store/authStore.js'
 import { getRoleColor } from '../utils/roleColors.js'
+import LanguageToggle from './LanguageToggle.jsx'
 
 const roleConfig = {
   farmer: {
@@ -31,12 +32,16 @@ function navLinkClass({ isActive }) {
 }
 
 export default function BottomNav() {
-  const { currentUser } = useAuth()
+  const currentUser = useAuthStore((s) => s.user)
   const navConfig = roleConfig[currentUser?.role] ?? roleConfig.farmer
   const roleColor = getRoleColor(currentUser?.role)
 
   return (
-    <nav className="fixed bottom-0 left-1/2 z-20 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-between border-t border-slate-200 bg-white px-4 py-3">
+    <nav className="relative fixed bottom-0 left-1/2 z-20 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-between border-t border-slate-200 bg-white px-4 py-3">
+      <div className="absolute -top-8 right-4">
+        <LanguageToggle />
+      </div>
+
       <NavLink
         to={navConfig.home}
         className={({ isActive }) => `${navLinkClass({ isActive })} ${isActive ? roleColor.text : ''}`}

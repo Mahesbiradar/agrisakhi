@@ -1,67 +1,54 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import JobCard from '../components/JobCard.jsx'
 import PageSkeleton from '../components/PageSkeleton.jsx'
-import { useAuth } from '../context/AuthContext.jsx'
-import { useData } from '../context/DataContext.jsx'
-import { useDelayedLoading } from '../utils/useDelayedLoading.js'
+import { jobsAPI } from '../lib/api.js'
 
-const filters = [
-  { label: 'All', value: 'all' },
-  { label: 'Open', value: 'open' },
-  { label: 'Closed', value: 'closed' },
+const statusFilters = [
+  { label: 'all', value: 'all' },
+  { label: 'open', value: 'open' },
+  { label: 'closed', value: 'closed' },
 ]
 
 export default function JobListPage() {
-  const { currentUser } = useAuth()
-  const { jobs } = useData()
+  const { t } = useTranslation()
   const [activeFilter, setActiveFilter] = useState('all')
-  const loading = useDelayedLoading()
 
-  const farmerJobs = jobs.filter((job) => job.farmerId === currentUser.id)
-  const filteredJobs =
-    activeFilter === 'all'
-      ? farmerJobs
-      : farmerJobs.filter((job) => job.status.toLowerCase() === activeFilter)
+  const { data, isLoading } = useQuery({
+    queryKey: ['farmer-jobs'],
+    queryFn: jobsAPI.myJobs,
+  })
 
-  if (loading) {
-    return <PageSkeleton variant="list" />
-  }
+  if (isLoading) return <PageSkeleton variant="list" />
+
+  const jobs = data?.data || []
+  const filtered = activeFilter === 'all' ? jobs : jobs.filter((j) => j.status === activeFilter)
 
   return (
     <div className="space-y-6">
       <div>
         <p className="text-sm font-medium text-green-700">Farmer Jobs</p>
-        <h1 className="text-2xl font-black text-slate-900">My Posted Jobs</h1>
+        <h1 className="text-2xl font-black text-slate-900">{t('myJobs')}</h1>
       </div>
 
       <div className="inline-flex rounded-full bg-slate-100 p-1">
-        {filters.map((filter) => (
-          <button
-            key={filter.value}
-            type="button"
-            onClick={() => setActiveFilter(filter.value)}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              activeFilter === filter.value
-                ? 'bg-white text-green-700 shadow-sm'
-                : 'text-slate-500'
-            }`}
-          >
-            {filter.label}
+        {statusFilters.map((f) => (
+          <button key={f.value} type="button" onClick={() => setActiveFilter(f.value)}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${activeFilter === f.value ? 'bg-white text-green-700 shadow-sm' : 'text-slate-500'}`}>
+            {t(f.label)}
           </button>
         ))}
       </div>
 
-      {filteredJobs.length > 0 ? (
+      {filtered.length > 0 ? (
         <div className="space-y-3">
-          {filteredJobs.map((job) => (
-            <JobCard key={job.id} job={job} />
-          ))}
+          {filtered.map((job) => <JobCard key={job.id} job={job} />)}
         </div>
       ) : (
         <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
           <p className="text-4xl">{'\u{1F33E}'}</p>
-          <p className="mt-3 text-base font-semibold text-slate-800">No jobs found</p>
-          <p className="mt-2 text-sm text-slate-500">Your posted jobs will appear here once you add one.</p>
+          <p className="mt-3 text-base font-semibold text-slate-800">{t('noJobsFound')}</p>
         </div>
       )}
     </div>
