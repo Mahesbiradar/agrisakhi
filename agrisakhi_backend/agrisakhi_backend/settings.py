@@ -30,8 +30,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -93,8 +93,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
 
 # CORS
-_cors_origins = os.environ.get('CORS_ORIGINS', 'http://localhost:5173')
-CORS_ALLOWED_ORIGINS = [origin.strip() for origin in _cors_origins.split(',') if origin.strip()]
+_cors_env = os.environ.get('CORS_ORIGINS', '')
+CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_env.split(',') if o.strip()] + [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://localhost:5176',
+    'http://localhost:5177',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:8000',
+]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept', 'accept-encoding', 'authorization',
+    'content-type', 'dnt', 'origin', 'user-agent',
+    'x-csrftoken', 'x-requested-with',
+]
 
 # DRF
 REST_FRAMEWORK = {

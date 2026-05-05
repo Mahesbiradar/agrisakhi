@@ -1,0 +1,108 @@
+Project: AgriSakhi
+Task: UX polish across all pages — make workflows feel production-ready
+
+--- GLOBAL CHANGES ---
+
+1. All action buttons must have minimum height 52px on mobile for easy tapping.
+
+2. All cards must have hover state: hover:shadow-md transition-shadow duration-200
+
+3. Phone number in all forms: show +91 prefix as gray text inside input,
+   input only accepts 10 digits, auto-format as user types.
+   Component: src/components/PhoneInput.jsx
+   <div className="flex border rounded-xl overflow-hidden">
+     <span className="bg-gray-50 px-3 flex items-center text-gray-500 text-sm border-r">+91</span>
+     <input type="tel" maxLength={10} className="flex-1 px-3 py-3 outline-none text-sm"
+       onChange={e => onChange(e.target.value.replace(/\D/g,'').slice(0,10))} />
+   </div>
+   Use this in LoginPage, RegisterPage, ForgotPasswordPage.
+
+4. Empty states: every list that can be empty must show:
+   A centered illustration (large emoji 64px) + heading + subtext + action button.
+   Examples:
+   - No jobs: 🌾 "No jobs posted yet" → "Post your first job" button
+   - No labour nearby: 👷 "No labourers found nearby" → "Try increasing radius" button
+   - No services: 🚜 "No services nearby" → subtext "Check back later"
+
+5. Loading states: all API-dependent lists show 3 skeleton cards while loading.
+   Skeleton card: same dimensions as real card, bg-gray-200 animate-pulse rounded-xl.
+   Create src/components/SkeletonCard.jsx:
+     Props: lines (default 3), showAvatar (bool)
+     Renders gray pulsing blocks matching card layout.
+
+--- FARMER DASHBOARD ---
+
+Replace plain section headers with:
+  <div className="flex items-center justify-between px-4 pt-5 pb-2">
+    <h2 className="font-semibold text-gray-800">{t('nearbyLabour')}</h2>
+    <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+      {count} found
+    </span>
+  </div>
+
+Post Job FAB (Floating Action Button):
+  Replace "Post a Job" card with a green FAB button fixed at bottom-right above BottomNav:
+  <button onClick={() => navigate('/farmer/post-job')}
+    className="fixed bottom-20 right-4 z-40 w-14 h-14 bg-green-600
+               rounded-full shadow-lg flex items-center justify-center
+               text-white text-2xl hover:bg-green-700 active:scale-95 transition-all">
+    +
+  </button>
+
+--- POST JOB PAGE ---
+
+Add a preview step before final submit:
+  After filling all fields, show a "Preview" button instead of "Post Job".
+  Preview screen shows the job card exactly as labour will see it.
+  Has "Edit" and "Confirm & Post" buttons.
+  This prevents accidental wrong posts.
+
+--- LABOUR DASHBOARD ---
+
+Add a sticky filter bar below the header:
+  Horizontal scrollable chips for work type filter:
+  All | 🌾 Harvesting | 🌱 Planting | 💧 Irrigation | 🧴 Spraying | Other
+  Active chip: bg-green-600 text-white
+  Inactive chip: bg-white border text-gray-600
+  Selecting a chip immediately filters the list (no submit button needed).
+
+Each job card must clearly show:
+  Top-right: distance badge (e.g. "12 km") in green pill
+  Middle: wage prominent "₹450/day" in large green text
+  Bottom row: 
+    Left — 🔊 Audio button (if audio_url exists, green, else hidden)
+    Right — "View & Apply →" button
+
+--- PROVIDER DASHBOARD ---
+
+Show a "Profile completion" banner if provider has < 1 service:
+  Yellow banner at top: "⚡ Add your first service so farmers can find you!"
+  With "Add Now →" button
+
+Each service card shows:
+  - Available toggle (green = available, gray = not)
+  - Edit button that opens a bottom sheet form (not a new page)
+
+--- PROFILE PAGE ---
+
+Show role-specific stats prominently:
+  Farmer: "X jobs posted · X applications received"
+  Labour: "X jobs applied · X accepted"
+  Provider: "X services listed · X enquiries"
+
+Add "Help & Support" section:
+  Kisan helpline: 1800-180-1551 (tap to call)
+  AgriSakhi support note: "For technical issues, contact your coordinator"
+
+--- GENERAL NAVIGATION ---
+
+Back button on all sub-pages (PostJob, AddService, JobDetail, ForgotPassword):
+  Fixed top-left arrow button, not inside the scroll area.
+  <button onClick={() => navigate(-1)}
+    className="fixed top-4 left-4 z-40 w-10 h-10 bg-white rounded-full
+               shadow flex items-center justify-center text-gray-600">
+    ←
+  </button>
+
+After all changes: npm run build — 0 errors.
+Update STATUS.md and TASKS.md.

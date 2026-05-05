@@ -1,0 +1,113 @@
+Project: AgriSakhi
+Task: Make all pages responsive — mobile, tablet, desktop
+
+Current problem: max-w-[430px] locks width even on desktop, wastes screen space.
+
+--- src/index.css or src/App.jsx --- 
+
+Strategy:
+- Mobile (<640px): full width, existing layout unchanged
+- Tablet (640-1024px): centered card, 520px wide, white bg, shadow
+- Desktop (>1024px): two-column layout — content left, info panel right
+
+--- src/components/AppLayout.jsx --- CREATE NEW ---
+
+This wraps all protected pages (dashboards, post job, etc.)
+
+export default function AppLayout({ children }) {
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <div className="max-w-6xl mx-auto px-4 py-0 md:py-6
+                      flex gap-6 justify-center">
+        
+        {/* Main content — mobile full, desktop fixed width */}
+        <div className="w-full sm:max-w-[520px] md:max-w-[480px]
+                        bg-white sm:rounded-2xl sm:shadow-lg
+                        min-h-screen sm:min-h-0 relative">
+          {children}
+        </div>
+
+        {/* Desktop sidebar — only shows on large screens */}
+        <div className="hidden lg:block w-72 shrink-0">
+          <div className="sticky top-6 space-y-4">
+            
+            {/* App info card */}
+            <div className="bg-white rounded-2xl shadow p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-green-100 rounded-xl
+                                flex items-center justify-center text-xl">🌾</div>
+                <div>
+                  <h3 className="font-semibold text-gray-800">AgriSakhi</h3>
+                  <p className="text-xs text-gray-500">Karnataka Agriculture Platform</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600">
+                Connecting farmers, labourers and service providers across Karnataka.
+              </p>
+            </div>
+
+            {/* Quick stats card — static for now */}
+            <div className="bg-green-50 rounded-2xl shadow p-5">
+              <h4 className="font-medium text-green-800 mb-3 text-sm">Platform Stats</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Active Jobs</span>
+                  <span className="font-medium text-green-700">—</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Registered Farmers</span>
+                  <span className="font-medium text-green-700">—</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Available Labour</span>
+                  <span className="font-medium text-green-700">—</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Help card */}
+            <div className="bg-white rounded-2xl shadow p-5">
+              <h4 className="font-medium text-gray-800 mb-2 text-sm">Need Help?</h4>
+              <p className="text-xs text-gray-500 mb-3">
+                For support, contact your nearest agriculture extension officer.
+              </p>
+              <a href="tel:18001801551"
+                className="text-green-700 text-sm font-medium">
+                📞 Kisan Call Center: 1800-180-1551
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
+--- Update all protected pages ---
+
+In FarmerDashboard.jsx, LabourDashboard.jsx, ProviderDashboard.jsx,
+PostJobPage.jsx, AddServicePage.jsx, JobListPage.jsx, ProfilePage.jsx,
+JobDetailPage.jsx:
+
+Import AppLayout and wrap the existing return:
+  import AppLayout from '../components/AppLayout'
+  
+  return (
+    <AppLayout>
+      <div className="max-w-full min-h-screen bg-gray-50 relative pb-20">
+        {/* existing page content unchanged */}
+      </div>
+    </AppLayout>
+  )
+
+Auth pages (Landing, Login, Register) keep their own full-screen centered layout,
+just update their wrapper:
+  <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="w-full max-w-[430px] bg-white rounded-2xl shadow-lg overflow-hidden">
+      {/* existing content */}
+    </div>
+  </div>
+
+npm run build — 0 errors after changes.

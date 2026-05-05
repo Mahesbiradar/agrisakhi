@@ -1,0 +1,69 @@
+Project: AgriSakhi
+Task: Fix location detection — free text district, full address from Nominatim
+
+--- src/utils/location.js --- REWRITE detectLocation() function only ---
+
+export async function detectLocation() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocation not supported'))
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude: lat, longitude: lng } = position.coords
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=en`,
+            { headers: { 'User-Agent': 'AgriSakhi/1.0' } }
+          )
+          const data = await res.json()
+          const a = data.address || {}
+
+          // Village: try most specific first
+          const village =
+            a.village || a.hamlet || a.neighbourhood ||
+            a.suburb || a.town || a.city_district || a.city || ''
+
+          // District: Karnataka uses 'county' or 'state_district'
+          const district =
+            a.county || a.state_district ||
+            a.district || a.city || ''
+
+          // State for validation
+          const state = a.state || ''
+
+          resolve({ lat, lng, village, district, state, fullAddress: data.display_name })
+        } catch {
+          // If Nominatim fails, still return coordinates with empty address
+          resolve({ lat, lng, village: '', district: '', state: '', fullAddress: '' })
+        }
+      },
+      (error) => {
+        reject(new Error('location_denied'))
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    )
+  })
+}
+
+--- src/pages/RegisterPage.jsx --- UPDATE Step 2 location fields ---
+
+Remove the district <select> dropdown entirely.
+Replace both village and district with plain <input type="text"> fields.
+
+Location detection button behavior:
+  On success: auto-fill both village and district inputs with detected values
+  Show below inputs in small gray text: "📍 Detected from GPS — you can edit if needed"
+  If state detected is not Karnataka, show yellow warning:
+    "⚠️ You appear to be outside Karnataka. Please verify your location."
+
+District input: type="text", placeholder="e.g. Bengaluru Urban, Mysuru, Shimoga"
+Village input: type="text", placeholder="e.g. Nagarabhavi, Hebbal"
+
+Both fields remain manually editable after auto-fill.
+Both are required — validate not empty before allowing submit.
+
+Keep the "Detect My Location" button with same green style.
+Add below button a small link: "Enter manually instead" that simply focuses the village input.

@@ -27,29 +27,32 @@ export function getNearby(items, userLat, userLng, radiusKm = 50) {
 export async function detectLocation() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      reject(new Error('location_failed'))
+      reject(new Error('Geolocation not supported'))
       return
     }
     navigator.geolocation.getCurrentPosition(
-      async ({ coords }) => {
-        const { latitude: lat, longitude: lng } = coords
+      async (position) => {
+        const { latitude: lat, longitude: lng } = position.coords
         try {
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`,
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=en`,
+            { headers: { 'User-Agent': 'AgriSakhi/1.0' } },
           )
           const data = await res.json()
-          const addr = data.address || {}
-          resolve({
-            lat,
-            lng,
-            village: addr.village || addr.suburb || addr.town || addr.hamlet || '',
-            district: addr.county || addr.state_district || '',
-          })
+          const a = data.address || {}
+          const village =
+            a.village || a.hamlet || a.neighbourhood ||
+            a.suburb || a.town || a.city_district || a.city || ''
+          const district =
+            a.county || a.state_district || a.district || a.city || ''
+          const state = a.state || ''
+          resolve({ lat, lng, village, district, state, fullAddress: data.display_name || '' })
         } catch {
-          reject(new Error('location_failed'))
+          resolve({ lat, lng, village: '', district: '', state: '', fullAddress: '' })
         }
       },
-      () => reject(new Error('location_failed')),
+      () => reject(new Error('location_denied')),
+      { timeout: 10000, enableHighAccuracy: true },
     )
   })
 }

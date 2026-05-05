@@ -16,6 +16,19 @@
 - [x] F07 — Update ProfilePage + add LanguageToggle component
 - [x] F08 — Run all tests, fix errors, verify npm run build passes
 
+
+
+
+## Bug Fixes & Improvements (before deployment)
+- [ ] FIX01 — CORS fix + proper error messages
+- [ ] FIX02 — Location detection: free text district, full address
+- [ ] FIX03 — Forgot password flow
+- [ ] FIX04 — Language toggle fixed + visible all pages
+- [ ] FIX05 — Responsive layout (mobile + tablet + desktop)
+- [ ] FIX06 — Admin role + admin dashboard
+- [ ] FIX07 — UX polish across all pages
+
+
 ## Deployment (after all above done)
 - [ ] D01 — Railway backend deploy
 - [ ] D02 — Netlify env vars + redeploy frontend

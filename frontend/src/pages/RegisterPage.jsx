@@ -7,8 +7,6 @@ import useAuthStore from '../store/authStore.js'
 import { getDashboardPath } from '../utils/auth.js'
 import { detectLocation } from '../utils/location.js'
 
-const districts = ['Shimoga', 'Davangere', 'Chitradurga', 'Shivamogga', 'Hassan', 'Tumkur', 'Dharwad', 'Gadag']
-
 const roleOptions = [
   { value: 'farmer', label: 'Farmer', icon: UserRound, description: 'Hire workers and manage farm needs' },
   { value: 'labour', label: 'Labour', icon: Users, description: 'Find nearby daily work quickly' },
@@ -26,10 +24,11 @@ export default function RegisterPage() {
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
     name: '', phone: '', password: '', role: initialRole,
-    village: '', district: 'Shimoga', lat: null, lng: null,
+    village: '', district: '', lat: null, lng: null,
   })
   const [detecting, setDetecting] = useState(false)
   const [locationDone, setLocationDone] = useState(false)
+  const [locationWarning, setLocationWarning] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -38,6 +37,7 @@ export default function RegisterPage() {
   const handleDetect = async () => {
     setDetecting(true)
     setError('')
+    setLocationWarning('')
     try {
       const loc = await detectLocation()
       setFormData((f) => ({
@@ -47,6 +47,9 @@ export default function RegisterPage() {
         district: loc.district || f.district,
       }))
       setLocationDone(true)
+      if (loc.state && !loc.state.toLowerCase().includes('karnataka')) {
+        setLocationWarning(`⚠️ You appear to be outside Karnataka (detected: ${loc.state}). Please verify your location.`)
+      }
     } catch {
       setError('Could not detect location. Please enter manually.')
     } finally {

@@ -1,0 +1,69 @@
+Project: AgriSakhi
+Task: Fix language toggle — visible on all screens, working EN/Kannada switch
+
+--- src/components/LanguageToggle.jsx --- REWRITE ---
+
+import { useTranslation } from 'react-i18next'
+
+export default function LanguageToggle() {
+  const { i18n } = useTranslation()
+  const current = i18n.language
+
+  const toggle = (lang) => {
+    i18n.changeLanguage(lang)
+    localStorage.setItem('agrisakhi_lang', lang)
+  }
+
+  return (
+    <div className="flex items-center bg-white border border-gray-200
+                    rounded-full px-1 py-1 shadow-sm gap-1">
+      <button
+        onClick={() => toggle('en')}
+        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+          current === 'en'
+            ? 'bg-green-600 text-white'
+            : 'text-gray-500 hover:text-green-700'
+        }`}>
+        EN
+      </button>
+      <button
+        onClick={() => toggle('kn')}
+        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+          current === 'kn'
+            ? 'bg-green-600 text-white'
+            : 'text-gray-500 hover:text-green-700'
+        }`}>
+        ಕನ್ನಡ
+      </button>
+    </div>
+  )
+}
+
+--- src/App.jsx or src/components/AppShell.jsx --- 
+
+Add a fixed positioned LanguageToggle that shows on ALL pages:
+
+In App.jsx, outside the Router's route definitions but inside the Router,
+add a globally fixed toggle:
+
+import LanguageToggle from './components/LanguageToggle'
+
+Inside the return, before <Routes>:
+<div className="fixed top-3 right-3 z-50">
+  <LanguageToggle />
+</div>
+
+This ensures it appears on every page including Landing, Login, Register.
+Remove any previous LanguageToggle placement from BottomNav or ProfilePage.
+
+--- src/lib/i18n.js --- VERIFY ---
+
+Make sure initialization reads localStorage:
+  lng: localStorage.getItem('agrisakhi_lang') || 'en'
+
+And that it's imported in main.jsx BEFORE App renders:
+  import './lib/i18n.js'   ← must be first import in main.jsx
+
+After fix: test toggle on landing page, login page, and farmer dashboard.
+Language must persist after page refresh.
+npm run build — 0 errors.

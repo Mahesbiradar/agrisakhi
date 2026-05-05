@@ -1,0 +1,151 @@
+Project: AgriSakhi
+Task: Add Admin user role and Admin Dashboard
+
+--- ADMIN WORKFLOW OVERVIEW ---
+Admin can:
+- See all users (farmers, labour, providers) — activate/deactivate
+- See all jobs — close any job
+- See all service listings — toggle availability
+- See all applications
+- Reset any user's password
+- View platform stats (total users, jobs, applications by status)
+Admin cannot: post jobs, apply to jobs (different role entirely)
+Admin accesses via same login page, role='admin' routes to /admin dashboard.
+
+--- BACKEND ---
+
+In users/models.py:
+Add 'admin' to role choices: ['farmer','labour','provider','admin']
+
+Create management command to create admin user:
+agrisakhi_backend/users/management/commands/create_admin.py:
+
+from django.core.management.base import BaseCommand
+from users.models import User
+
+class Command(BaseCommand):
+    def handle(self, *args, **kwargs):
+        if not User.objects.filter(role='admin').exists():
+            user = User.objects.create_user(
+                phone='0000000000',
+                password='agrisakhi_admin_2024',
+                name='Admin',
+                role='admin',
+                village='Bengaluru',
+                district='Bengaluru Urban',
+                lat=12.9716, lng=77.5946
+            )
+            self.stdout.write(f'Admin created. Phone: 0000000000')
+        else:
+            self.stdout.write('Admin already exists.')
+
+Run: python manage.py create_admin
+
+In users/views.py add admin-only views:
+Use permission class: IsAuthenticated + request.user.role == 'admin'
+
+Create IsAdmin permission class:
+class IsAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == 'admin'
+
+AdminStatsView(APIView) — permission: IsAdmin
+  GET: return {
+    total_users: User.objects.count(),
+    farmers: User.objects.filter(role='farmer').count(),
+    labours: User.objects.filter(role='labour').count(),
+    providers: User.objects.filter(role='provider').count(),
+    total_jobs: Job.objects.count(),
+    open_jobs: Job.objects.filter(status='open').count(),
+    total_applications: Application.objects.count(),
+    pending_applications: Application.objects.filter(status='pending').count(),
+    total_services: ServiceListing.objects.count(),
+  }
+
+AdminUsersView(generics.ListAPIView) — permission: IsAdmin
+  Returns all users. Query param ?role= to filter. ?search= to search by name/phone.
+  Serializer includes: id, name, phone, role, village, district, is_active, created_at
+
+AdminUserToggleView(APIView) — permission: IsAdmin
+  POST with {user_id}: toggle user.is_active
+  Returns updated is_active status
+
+AdminPasswordResetView(APIView) — permission: IsAdmin
+  POST with {user_id, new_password}
+  Resets password directly
+
+AdminJobsView(generics.ListAPIView) — permission: IsAdmin
+  Returns all jobs with farmer name. ?status= filter.
+
+AdminJobCloseView(APIView) — permission: IsAdmin
+  POST with {job_id}: sets job.status='closed'
+
+AdminServicesView(generics.ListAPIView) — permission: IsAdmin
+  Returns all service listings
+
+In users/urls.py add:
+  path('admin/stats/', AdminStatsView.as_view()),
+  path('admin/users/', AdminUsersView.as_view()),
+  path('admin/users/toggle/', AdminUserToggleView.as_view()),
+  path('admin/users/reset-password/', AdminPasswordResetView.as_view()),
+  path('admin/jobs/', AdminJobsView.as_view()),
+  path('admin/jobs/close/', AdminJobCloseView.as_view()),
+  path('admin/services/', AdminServicesView.as_view()),
+
+--- FRONTEND ---
+
+In src/lib/api.js add adminAPI:
+  adminAPI: {
+    getStats: () => api.get('/users/admin/stats/'),
+    getUsers: (params) => api.get('/users/admin/users/', { params }),
+    toggleUser: (user_id) => api.post('/users/admin/users/toggle/', { user_id }),
+    resetUserPassword: (user_id, new_password) => api.post('/users/admin/users/reset-password/', { user_id, new_password }),
+    getJobs: (params) => api.get('/users/admin/jobs/', { params }),
+    closeJob: (job_id) => api.post('/users/admin/jobs/close/', { job_id }),
+    getServices: () => api.get('/users/admin/services/'),
+  }
+
+Create src/pages/AdminDashboard.jsx:
+
+Layout: AppLayout wrapper. 4 tabs at top: Overview | Users | Jobs | Services
+
+TAB 1 — Overview:
+  4 stat cards in 2x2 grid:
+  - Total Farmers (green card)
+  - Total Labour (amber card)
+  - Open Jobs (blue card)
+  - Total Services (purple card)
+  Use useQuery(['admin-stats'], adminAPI.getStats)
+  Each card: large number + label + icon
+
+TAB 2 — Users:
+  Search input + role filter tabs (All / Farmer / Labour / Provider)
+  Table/list of users: name, phone, role badge, village, district, 
+  status badge (Active/Inactive), joined date
+  Each row has two action buttons:
+    "Deactivate"/"Activate" toggle button
+    "Reset Password" button → shows inline input for new password + confirm button
+  useQuery(['admin-users', filters], () => adminAPI.getUsers(filters))
+
+TAB 3 — Jobs:
+  Filter: All / Open / Closed
+  List of jobs: title, farmer name, village, date, status badge
+  Each job has "Close Job" button if status=open
+  Shows applications count per job
+
+TAB 4 — Services:
+  List of all service listings: service name, provider, category, village, available badge
+  No actions needed for MVP (providers manage their own)
+
+In App.jsx add route:
+  /admin → <AdminDashboard /> (protected, role check: only admin can access)
+
+Update ProtectedRoute to handle admin role:
+  if user.role === 'admin' and path is not /admin → redirect to /admin
+  if user.role !== 'admin' and path is /admin → redirect to role dashboard
+
+Update login flow: after login if user.role === 'admin' → navigate('/admin')
+
+Run: python manage.py create_admin
+Credentials: phone=0000000000, password=agrisakhi_admin_2024
+npm run build — 0 errors.
