@@ -1,0 +1,78 @@
+Project: AgriSakhi backend
+Task: Create all Django models
+
+--- users/models.py ---
+Custom user model extending AbstractBaseUser:
+- id: UUIDField primary_key, default=uuid4
+- name: CharField 100
+- phone: CharField 15, unique=True (login identifier)
+- password: handled by AbstractBaseUser
+- role: CharField choices=['farmer','labour','provider']
+- village: CharField 100
+- district: CharField 100
+- lat: FloatField null=True blank=True
+- lng: FloatField null=True blank=True
+- avatar_url: URLField blank=True
+- is_active: BooleanField default=True
+- is_staff: BooleanField default=False
+- created_at: DateTimeField auto_now_add
+USERNAME_FIELD = 'phone'
+REQUIRED_FIELDS = ['name', 'role']
+Create UserManager with create_user and create_superuser methods.
+
+In settings.py add: AUTH_USER_MODEL = 'users.User'
+
+--- jobs/models.py ---
+class Job(models.Model):
+- id: UUIDField primary_key, default=uuid4
+- farmer: ForeignKey(settings.AUTH_USER_MODEL, on_delete=CASCADE, related_name='posted_jobs')
+- title: CharField 200
+- work_type: CharField choices=['harvesting','planting','irrigation','spraying','land_prep','other']
+- description: TextField blank=True
+- audio_url: URLField blank=True  ← for voice recording
+- image_url: URLField blank=True  ← optional photo
+- wage_per_day: IntegerField
+- duration_days: IntegerField
+- workers_needed: IntegerField default=1
+- village: CharField 100
+- district: CharField 100
+- lat: FloatField
+- lng: FloatField
+- status: CharField choices=['open','closed'] default='open'
+- created_at: DateTimeField auto_now_add
+
+class Application(models.Model):
+- id: UUIDField primary_key, default=uuid4
+- job: ForeignKey(Job, on_delete=CASCADE, related_name='applications')
+- labour: ForeignKey(settings.AUTH_USER_MODEL, on_delete=CASCADE, related_name='applications')
+- status: CharField choices=['pending','accepted','rejected'] default='pending'
+- applied_at: DateTimeField auto_now_add
+- class Meta: unique_together = ['job', 'labour']
+
+--- services/models.py ---
+class ServiceListing(models.Model):
+- id: UUIDField primary_key, default=uuid4
+- provider: ForeignKey(settings.AUTH_USER_MODEL, on_delete=CASCADE, related_name='services')
+- service_name: CharField 200
+- category: CharField choices=['machinery','chemical','seeds','testing','other']
+- description: TextField blank=True
+- image_url: URLField blank=True
+- price_info: CharField 200
+- village: CharField 100
+- district: CharField 100
+- lat: FloatField
+- lng: FloatField
+- is_available: BooleanField default=True
+- created_at: DateTimeField auto_now_add
+
+class Rating(models.Model):
+- id: UUIDField primary_key, default=uuid4
+- job: ForeignKey(Job, on_delete=CASCADE)
+- rater: ForeignKey(AUTH_USER_MODEL, related_name='ratings_given', on_delete=CASCADE)
+- ratee: ForeignKey(AUTH_USER_MODEL, related_name='ratings_received', on_delete=CASCADE)
+- stars: IntegerField (1-5 validator)
+- comment: TextField blank=True
+- created_at: DateTimeField auto_now_add
+- class Meta: unique_together = ['job', 'rater']
+
+After creating models: python manage.py makemigrations && python manage.py migrate

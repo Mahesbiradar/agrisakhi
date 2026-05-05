@@ -1,0 +1,37 @@
+Project: AgriSakhi frontend
+Task: Connect labour pages to real API
+
+--- src/pages/LabourDashboard.jsx --- UPDATE
+  const [filters, setFilters] = useState({radius_km:50, work_type:'', min_wage:0, search:''})
+  
+  const { data: jobs, isLoading, refetch } = useQuery(
+    ['jobs', filters],
+    () => jobsAPI.list({lat:user.lat, lng:user.lng, ...filters}),
+    {keepPreviousData: true}
+  )
+
+Filter changes trigger automatic refetch (key includes filters).
+Use t() for all strings.
+
+Job cards: if job has audio_url, show small "🔊 Listen" button that plays inline audio
+  <audio src={job.audio_url} /> with play/pause toggle using useRef on audio element
+
+If job has image_url, show thumbnail image (60x60, rounded, object-cover) on the card.
+
+--- src/pages/JobDetailPage.jsx --- UPDATE
+  const { id } = useParams()
+  const { data: job } = useQuery(['job', id], () => jobsAPI.getById(id))
+  const applyMutation = useMutation(() => jobsAPI.apply(id))
+
+If job.audio_url: show audio player with prominent "🔊 ವಿವರ ಕೇಳಿ / Listen to description" button
+  Tap shows <audio controls src={job.audio_url} autoPlay /> in a card
+
+If job.image_url: show full-width image (200px height, object-cover, rounded-xl)
+
+Apply button:
+  - On tap: applyMutation.mutate()
+  - Loading state: "Applying..."
+  - On success: show green checkmark + "Application sent! Farmer will contact you."
+  - On 400 (already applied): show "You have already applied for this job"
+  
+Use t() for all strings.

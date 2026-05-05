@@ -1,0 +1,91 @@
+Project: AgriSakhi frontend Phase 2
+Task: Install new packages, create API layer and i18n. DO NOT touch existing files except main.jsx.
+
+EXISTING FILES TO KEEP UNCHANGED:
+src/utils/location.js (already has getDistanceKm, getNearby — do not overwrite)
+src/utils/auth.js (Phase 1 auth helpers — keep, we add Zustand alongside)
+src/context/AuthContext.jsx (keep working — pages still import from here during migration)
+src/context/DataContext.jsx (keep working)
+
+STEP 1 — Install packages:
+npm install axios @tanstack/react-query zustand i18next react-i18next
+
+STEP 2 — Create src/lib/api.js
+Axios instance with baseURL from import.meta.env.VITE_API_URL
+Request interceptor: attach Authorization: Bearer from localStorage key 'agrisakhi_access'
+Response interceptor: on 401, attempt refresh via POST /auth/token/refresh/ with 'agrisakhi_refresh'
+  If refresh ok: save new access token, retry request
+  If refresh fails: clear both tokens from localStorage, redirect to /login
+
+Export named API function groups:
+  authAPI: { register(data), login(data) }
+  usersAPI: { getProfile(), updateProfile(data), getNearby(params) }
+  jobsAPI: { list(params), create(data), getById(id), myJobs(), apply(jobId), getApplications(jobId), updateApplication(appId, data) }
+  servicesAPI: { list(params), create(data), getById(id), myServices() }
+  ratingsAPI: { create(data) }
+
+STEP 3 — Create src/store/authStore.js
+Zustand store (does NOT replace AuthContext yet — runs alongside during migration):
+  state: { user:null, accessToken:null, isLoggedIn:false }
+  setAuth(user, accessToken, refreshToken): saves to state + localStorage keys agrisakhi_access, agrisakhi_refresh, agrisakhi_user
+  clearAuth(): clears state + all 3 localStorage keys
+  loadFromStorage(): on app start, reads localStorage, restores state if tokens exist
+
+STEP 4 — Create src/locales/en.json and src/locales/kn.json
+(exact content as specified in original F01 prompt — all translation keys)
+
+STEP 5 — Create src/lib/i18n.js
+i18next + react-i18next setup:
+  import en from '../locales/en.json'
+  import kn from '../locales/kn.json'
+  resources: { en: {translation: en}, kn: {translation: kn} }
+  lng: localStorage.getItem('agrisakhi_lang') || 'en'
+  fallbackLng: 'en'
+  interpolation: { escapeValue: false }
+
+STEP 6 — Update src/main.jsx ONLY (add new providers, keep existing ones):
+Add imports: QueryClient, QueryClientProvider from @tanstack/react-query
+Add import: '../src/lib/i18n.js'  (side effect import for i18n initialization)
+Add import: authStore from './store/authStore'
+Wrap existing app with QueryClientProvider (new QueryClient({ defaultOptions:{ queries:{ staleTime: 5*60*1000, retry:1 }}}))
+Keep existing AuthProvider and DataProvider wrapping — do not remove them
+Add on mount: authStore.getState().loadFromStorage()
+
+STEP 7 — Create .env in project root (if not exists):
+VITE_API_URL=http://localhost:8000/api
+VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+VITE_CLOUDINARY_UPLOAD_PRESET=agrisakhi_upload
+
+STEP 8 — Verify:
+Run npm run build — must complete with 0 errors.
+
+STEP 9 — Create src/components/LanguageToggle.jsx
+
+import { useTranslation } from 'react-i18next'
+
+A small pill-shaped toggle button.
+State: reads current language from i18n.language
+
+UI:
+  <button> showing "EN | ಕನ್ನಡ"
+  Active language is font-bold text-green-700
+  Inactive language is text-gray-400
+  A thin vertical divider "|" between them
+  bg-white border border-gray-200 rounded-full px-3 py-1 text-sm
+
+On click EN side: i18n.changeLanguage('en'), localStorage.setItem('agrisakhi_lang','en')
+On click KN side: i18n.changeLanguage('kn'), localStorage.setItem('agrisakhi_lang','kn')
+
+Export default LanguageToggle.
+
+Also import and render <LanguageToggle /> inside src/components/BottomNav.jsx
+— place it as a small floating element above the nav bar:
+  <div className="absolute -top-8 right-4">
+    <LanguageToggle />
+  </div>
+Make sure BottomNav wrapper div has position: relative (className="relative").
+
+This makes the toggle accessible from ALL pages that show BottomNav
+without needing to add it to every individual page.
+
+Verify: npm run build — 0 errors before marking F01 complete.

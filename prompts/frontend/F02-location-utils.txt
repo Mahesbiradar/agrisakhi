@@ -1,0 +1,85 @@
+Project: AgriSakhi frontend
+Task: Location detection and Cloudinary upload utilities
+
+--- src/utils/location.js ---
+export async function detectLocation():
+  Returns Promise<{lat, lng, village, district}>
+  
+  Steps:
+  1. navigator.geolocation.getCurrentPosition() wrapped in Promise
+  2. On success: call Nominatim reverse geocode:
+     fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&format=json&lon=${lng}&accept-language=en`)
+  3. Parse response.address:
+     village = address.village || address.suburb || address.town || address.hamlet || ''
+     district = address.county || address.state_district || ''
+  4. Return {lat, lng, village, district}
+  5. On geolocation error or fetch error: throw Error('location_failed')
+
+export function haversineKm(lat1, lng1, lat2, lng2):
+  Haversine formula, returns distance in km.
+
+export function getNearby(items, userLat, userLng, radiusKm=50):
+  Filter + sort array of items by distance. Adds distanceKm field.
+
+--- src/utils/cloudinary.js ---
+CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/upload`
+UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+
+export async function uploadImage(file):
+  FormData with file + upload_preset + folder='agrisakhi/images'
+  POST to CLOUDINARY_URL
+  Returns secure_url string
+
+export async function uploadAudio(blob):
+  FormData with blob as file named 'audio.webm' + upload_preset + resource_type='video' + folder='agrisakhi/audio'
+  POST to CLOUDINARY_URL
+  Returns secure_url string
+
+--- src/utils/audio.js ---
+export class AudioRecorder:
+  properties: mediaRecorder, chunks, stream
+  
+  async start():
+    Request microphone: navigator.mediaDevices.getUserMedia({audio: true})
+    Create MediaRecorder(stream, {mimeType: 'audio/webm'})
+    mediaRecorder.ondataavailable: push to chunks
+    mediaRecorder.start()
+  
+  stop(): Returns Promise<Blob>
+    mediaRecorder.stop()
+    On onstop: resolve(new Blob(chunks, {type:'audio/webm'}))
+    Stop all stream tracks
+  
+  isSupported(): return !!navigator.mediaDevices?.getUserMedia
+
+--- src/components/AudioRecorder.jsx ---
+Component props: onAudioReady(url), existingUrl
+Uses AudioRecorder class above.
+
+States: idle | requesting | recording | uploading | done | error
+
+UI:
+- idle: round mic button (56px, green) + label from t('tapToRecord')
+- recording: pulsing red circle + duration timer (00:00 counting up) + t('stopRecording') label
+  Add CSS pulse animation on the recording button
+- uploading: spinner + "Uploading..."
+- done: green checkmark + audio player (<audio controls src={url}/>) + "Re-record" link
+- error: red text with error message + retry button
+
+On tap when idle → start recording
+On tap when recording → stop → upload to Cloudinary via uploadAudio() → call onAudioReady(url)
+
+--- src/components/ImageUpload.jsx ---
+Component props: onImageReady(url), label=t('uploadPhoto')
+
+A dashed border box (full width, 120px tall):
+- Shows camera icon + label text when no image
+- On tap: triggers hidden <input type="file" accept="image/*" capture="environment">
+- On file select: show preview thumbnail + "Uploading..." spinner
+- Upload via uploadImage() → call onImageReady(url)
+- After upload: show thumbnail with a remove (×) button
+
+--- src/components/LanguageToggle.jsx ---
+A small toggle button fixed at top-right of screen (or in header).
+Shows "EN | ಕನ್ನಡ" — active language is bold.
+On click: call i18n.changeLanguage(), save to localStorage 'agrisakhi_lang'.

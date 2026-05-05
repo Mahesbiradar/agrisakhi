@@ -1,0 +1,87 @@
+Project: AgriSakhi backend
+Task: Serializers, Views, URLs for all apps
+
+--- users/serializers.py ---
+RegisterSerializer: fields = name, phone, password, role, village, district, lat, lng
+  - write_only password, validate phone unique, create user with set_password()
+LoginSerializer: fields = phone, password (validate and return user)
+UserProfileSerializer: all fields except password, read_only = id, created_at
+
+--- users/views.py ---
+RegisterView(generics.CreateAPIView): permission_classes=[AllowAny]
+  - on success return: {user: UserProfileSerializer, access: token, refresh: token}
+LoginView(APIView): permission_classes=[AllowAny]
+  - validate credentials, return same shape as register
+UserProfileView(generics.RetrieveUpdateAPIView): permission_classes=[IsAuthenticated]
+  - get/update current user profile
+NearbyUsersView(generics.ListAPIView): permission_classes=[IsAuthenticated]
+  - query params: role, lat, lng, radius_km (default 50)
+  - filter users by role, compute distance using Haversine SQL:
+    SELECT *, (6371 * acos(cos(radians(lat)) * cos(radians(%s)) * cos(radians(%s) - radians(lng)) + sin(radians(lat)) * sin(radians(%s)))) AS distance
+    FROM users_user WHERE role=%s HAVING distance < %s ORDER BY distance
+  - return list with distance field added
+
+--- users/urls.py ---
+register/, login/, profile/, nearby/
+
+--- jobs/serializers.py ---
+JobSerializer: all fields + farmer_name (SerializerMethodField) + distance (SerializerMethodField, returns None by default)
+ApplicationSerializer: all fields + job title + labour name
+
+--- jobs/views.py ---
+JobListCreateView(generics.ListCreateAPIView):
+  - GET: AllowAny. Query params: lat, lng, radius_km=50, work_type, min_wage, district
+    Apply Haversine filter same as users. Annotate distance. Return sorted by distance.
+  - POST: IsAuthenticated, role must be 'farmer'. Auto-set farmer=request.user, lat/lng/village/district from user profile.
+
+JobDetailView(generics.RetrieveUpdateDestroyAPIView):
+  - GET: AllowAny
+  - PUT/DELETE: IsAuthenticated + must be job owner
+
+FarmerJobsView(generics.ListAPIView): IsAuthenticated
+  - returns jobs where farmer=request.user
+
+ApplicationCreateView(generics.CreateAPIView): IsAuthenticated
+  - role must be 'labour'. Auto-set labour=request.user.
+  - On create: check job is open, check not already applied.
+
+ApplicationListView(generics.ListAPIView): IsAuthenticated
+  - Farmer sees applications for their jobs. Labour sees their own applications.
+
+ApplicationUpdateView(generics.UpdateAPIView): IsAuthenticated
+  - Farmer can set status accepted/rejected on applications for their jobs.
+
+--- jobs/urls.py ---
+'': JobListCreateView
+'my/': FarmerJobsView
+'<uuid:pk>/': JobDetailView
+'<uuid:job_id>/apply/': ApplicationCreateView
+'<uuid:job_id>/applications/': ApplicationListView
+'applications/<uuid:pk>/': ApplicationUpdateView
+
+--- services/serializers.py ---
+ServiceListingSerializer: all fields + provider_name + distance
+RatingSerializer: all fields
+
+--- services/views.py ---
+ServiceListCreateView(generics.ListCreateAPIView):
+  - GET AllowAny: query params lat, lng, radius_km=60, category. Haversine filter + distance sort.
+  - POST IsAuthenticated: role must be 'provider'. Auto-set provider=request.user.
+
+ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):
+  - GET AllowAny, PUT/DELETE IsAuthenticated + owner only
+
+ProviderServicesView(generics.ListAPIView): IsAuthenticated
+  - returns services where provider=request.user
+
+RatingCreateView(generics.CreateAPIView): IsAuthenticated
+  - Validate job is completed, user was involved, not already rated.
+
+--- services/urls.py ---
+'': ServiceListCreateView
+'my/': ProviderServicesView
+'<uuid:pk>/': ServiceDetailView
+'ratings/': RatingCreateView
+
+After writing all code: python manage.py check
+Fix any errors before completing.

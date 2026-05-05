@@ -1,0 +1,17 @@
+Project: AgriSakhi frontend
+Task: Connect provider pages to real API
+
+--- src/pages/ProviderDashboard.jsx --- UPDATE
+  const { data: myServices } = useQuery(['my-services'], servicesAPI.myServices)
+Replace mock data. Loading skeleton. Use t().
+
+--- src/pages/AddServicePage.jsx --- UPDATE
+Add ImageUpload component for service photo.
+  - state: imageUrl = ''
+
+On submit:
+  const mutation = useMutation((data) => servicesAPI.create(data))
+  mutation.mutate({service_name, category, description, price_info, image_url:imageUrl, is_available:true})
+  On success: navigate('/provider'), invalidate ['my-services']
+
+Use t() for all strings.

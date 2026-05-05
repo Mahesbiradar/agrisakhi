@@ -1,0 +1,37 @@
+Project: AgriSakhi frontend
+Task: Connect farmer pages to real API
+
+--- src/pages/FarmerDashboard.jsx --- UPDATE
+Replace all mock data with:
+  const { data: nearbyLabour } = useQuery(['nearby-labour'], () =>
+    usersAPI.getNearby({role:'labour', lat:user.lat, lng:user.lng, radius_km:50}))
+  
+  const { data: nearbyServices } = useQuery(['nearby-services'], () =>
+    servicesAPI.list({lat:user.lat, lng:user.lng, radius_km:60}))
+
+Show skeleton loaders (gray animate-pulse blocks matching card shape) while loading.
+On error: show "Could not load data. Check connection." with retry button.
+
+Use useTranslation hook: const {t} = useTranslation()
+Replace all hardcoded English strings with t('key') calls.
+
+--- src/pages/PostJobPage.jsx --- UPDATE
+Add AudioRecorder component below description field.
+  - state: audioUrl = ''
+  - <AudioRecorder onAudioReady={(url) => setAudioUrl(url)} />
+
+Add ImageUpload component below audio recorder.
+  - state: imageUrl = ''  
+  - <ImageUpload onImageReady={(url) => setImageUrl(url)} />
+
+On submit:
+  const mutation = useMutation((data) => jobsAPI.create(data))
+  mutation.mutate({title, work_type, description, audio_url:audioUrl, image_url:imageUrl,
+    wage_per_day, duration_days, workers_needed})
+  On success: navigate('/farmer'), invalidate ['farmer-jobs'] query
+
+Show loading on button. Show error message on failure.
+
+--- src/pages/JobListPage.jsx --- UPDATE (farmer's own jobs)
+  const { data: jobs } = useQuery(['farmer-jobs'], jobsAPI.myJobs)
+Replace mock data. Show loading skeleton.

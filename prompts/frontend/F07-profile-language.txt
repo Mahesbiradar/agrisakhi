@@ -1,0 +1,29 @@
+Project: AgriSakhi frontend
+Task: Connect ProfilePage to real API. LanguageToggle already built in F01.
+
+--- src/pages/ProfilePage.jsx --- UPDATE
+
+Add imports:
+  import { useQuery, useMutation } from '@tanstack/react-query'
+  import { usersAPI } from '../lib/api'
+  import { useTranslation } from 'react-i18next'
+  import useAuthStore from '../store/authStore'
+
+Replace mock user data:
+  const { t } = useTranslation()
+  const { data: profile, isLoading } = useQuery(['profile'], usersAPI.getProfile)
+
+Show PageSkeleton while isLoading.
+
+Replace all hardcoded English strings with t('key') calls using existing en.json keys.
+
+Logout section:
+  const { clearAuth } = useAuthStore()
+  On logout button: clearAuth() then navigate('/')
+
+NOTE: LanguageToggle is already rendered in BottomNav (built in F01).
+Do NOT add it again here. Profile page does not need to import it.
+You can add a label in the settings section: "Language / ಭಾಷೆ" 
+pointing user to the toggle in the bottom nav, no extra code needed.
+
+Verify: npm run build — 0 errors.

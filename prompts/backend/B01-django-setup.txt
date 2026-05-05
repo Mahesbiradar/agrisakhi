@@ -1,0 +1,51 @@
+Project: AgriSakhi backend
+Stack: Django 4.2, DRF, PostgreSQL, Railway deployment
+Goal: Scaffold the project
+
+Steps:
+1. django-admin startproject agrisakhi_backend
+2. pip install djangorestframework djangorestframework-simplejwt django-cors-headers psycopg2-binary pillow python-dotenv gunicorn cloudinary django-cloudinary-storage
+
+3. Create apps:
+   python manage.py startapp users
+   python manage.py startapp jobs
+   python manage.py startapp services
+
+4. settings.py changes:
+   - Load env vars from .env using python-dotenv
+   - INSTALLED_APPS: add rest_framework, corsheaders, cloudinary, cloudinary_storage, users, jobs, services
+   - DATABASES: PostgreSQL using env vars DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
+   - CORS_ALLOWED_ORIGINS: read from env var CORS_ORIGINS (comma separated)
+   - REST_FRAMEWORK default auth: JWTAuthentication
+   - JWT settings: ACCESS_TOKEN_LIFETIME=15min, REFRESH_TOKEN_LIFETIME=7days, ROTATE_REFRESH_TOKENS=True
+   - DEFAULT_RENDERER_CLASSES: JSONRenderer only (no browsable API in prod)
+   - Cloudinary storage settings from env vars CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
+   - TIME_ZONE = 'Asia/Kolkata'
+   - LANGUAGE_CODE = 'en-us'
+
+5. Create .env.example:
+   SECRET_KEY=
+   DEBUG=True
+   DB_NAME=agrisakhi
+   DB_USER=postgres
+   DB_PASSWORD=
+   DB_HOST=localhost
+   DB_PORT=5432
+   CORS_ORIGINS=http://localhost:5173
+   CLOUDINARY_CLOUD_NAME=
+   CLOUDINARY_API_KEY=
+   CLOUDINARY_API_SECRET=
+
+6. agrisakhi_backend/urls.py:
+   Include routes: api/auth/, api/users/, api/jobs/, api/services/
+   Add simplejwt token obtain/refresh urls under api/auth/
+
+7. Create Procfile:
+   web: gunicorn agrisakhi_backend.wsgi --log-file -
+
+8. Create railway.json:
+   { "build": { "builder": "NIXPACKS" }, "deploy": { "startCommand": "gunicorn agrisakhi_backend.wsgi" } }
+
+9. requirements.txt: freeze all installed packages
+
+Do NOT run migrations yet. Models come next.

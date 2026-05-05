@@ -1,0 +1,34 @@
+Project: AgriSakhi backend
+Task: Write and run tests for all API endpoints
+
+Create tests/test_api.py (or inside each app's tests.py):
+
+Use Django TestCase + APIClient from rest_framework.test
+
+Test fixtures: create 3 users (farmer, labour, provider) with known credentials.
+
+Tests to write and run:
+
+AUTH:
+- test_register_farmer: POST /api/auth/register/ with valid data → 201, returns access token
+- test_register_duplicate_phone: same phone twice → 400
+- test_login_success: valid phone+password → 200, returns tokens
+- test_login_wrong_password: → 400
+
+JOBS:
+- test_create_job_as_farmer: authenticated farmer POST /api/jobs/ → 201
+- test_create_job_as_labour: authenticated labour POST /api/jobs/ → 403
+- test_list_jobs_with_location: GET /api/jobs/?lat=14.2&lng=75.9&radius_km=100 → 200, list returned
+- test_apply_to_job: authenticated labour POST /api/jobs/{id}/apply/ → 201
+- test_apply_twice: same labour applies twice → 400
+
+SERVICES:
+- test_create_service_as_provider: authenticated provider POST /api/services/ → 201
+- test_list_services_with_location: GET /api/services/?lat=14.2&lng=75.9 → 200
+
+NEARBY:
+- test_nearby_labour: GET /api/users/nearby/?role=labour&lat=14.2&lng=75.9 → 200, list has distance field
+
+Run: python manage.py test
+All tests must pass before this prompt is complete.
+Print test output. If any test fails, fix the code and re-run.

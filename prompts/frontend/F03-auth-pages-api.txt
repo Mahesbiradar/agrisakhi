@@ -1,0 +1,30 @@
+Project: AgriSakhi frontend
+Task: Connect auth pages to real API. Replace all mock auth logic.
+
+--- src/pages/RegisterPage.jsx --- UPDATE
+Step 1: name, phone, password, role selection (unchanged UI)
+Step 2: 
+  - Add "Detect My Location" button at top using detectLocation() from utils/location.js
+  - Button states: idle → detecting (spinner) → done (show detected village+district in green)
+  - Village and district fields: auto-filled after detection, still manually editable
+  - Password field added to step 1
+
+On final submit:
+  const res = await authAPI.register({name, phone, password, role, village, district, lat, lng})
+  authStore.setAuth(res.data.user, res.data.access, res.data.refresh)
+  navigate to role dashboard
+
+Show inline error if API returns 400 (e.g. "Phone already registered")
+Show loading spinner on button while submitting.
+
+--- src/pages/LoginPage.jsx --- UPDATE
+On submit:
+  const res = await authAPI.login({phone, password})
+  authStore.setAuth(res.data.user, res.data.access, res.data.refresh)
+  navigate based on user.role
+
+Show error "Invalid phone or password" on 400.
+Show loading state on button.
+
+--- src/components/ProtectedRoute.jsx --- UPDATE
+Read isLoggedIn from authStore (Zustand) instead of AuthContext.

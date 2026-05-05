@@ -1,0 +1,36 @@
+Project: AgriSakhi frontend
+Task: End-to-end flow testing checklist (manual + automated)
+
+Create src/tests/flows.test.js using Vitest + @testing-library/react:
+
+Install: npm install -D vitest @testing-library/react @testing-library/user-event jsdom
+
+In vite.config.js add:
+  test: { environment: 'jsdom', globals: true, setupFiles: './src/tests/setup.js' }
+
+Create src/tests/setup.js:
+  import '@testing-library/jest-dom'
+
+Write these tests (mock axios with vi.mock):
+
+test 1: RegisterPage renders role cards
+test 2: Language toggle switches text from English to Kannada
+test 3: PostJobPage shows AudioRecorder component
+test 4: LabourDashboard shows skeleton when loading
+test 5: JobDetailPage shows audio player when job.audio_url is set
+test 6: Login form shows error on failed submit
+
+Run: npx vitest run
+All tests must pass.
+
+Also manually verify these flows work with backend running:
+[ ] Register as farmer → auto-detect location → dashboard loads
+[ ] Post a job with voice recording + photo
+[ ] Login as labour → see jobs list with distance
+[ ] Tap job → see audio player → apply → success message
+[ ] Register as provider → add service with photo
+[ ] Switch language EN ↔ Kannada on any page
+[ ] Logout → redirect to landing
+[ ] Login again → restore session
+
+Document any failures and fix before marking done.
