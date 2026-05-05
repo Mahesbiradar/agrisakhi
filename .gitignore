@@ -13,6 +13,12 @@ dist-ssr
 *.local
 agrisakhi/
 
+# Frontend build artifacts
+frontend/node_modules
+frontend/dist
+frontend/.env
+frontend/.vite
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
