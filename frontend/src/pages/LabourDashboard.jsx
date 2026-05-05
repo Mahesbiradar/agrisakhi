@@ -1,8 +1,7 @@
 import {
   MapPin, MessageCircle, Phone, Search, Settings2, SlidersHorizontal, SunMedium,
 } from 'lucide-react'
-import { useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import BottomSheet from '../components/BottomSheet.jsx'
@@ -21,33 +20,30 @@ function formatToday() {
   return new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-function AudioButton({ audioUrl }) {
-  const audioRef = useRef(null)
-  const [playing, setPlaying] = useState(false)
-
-  const toggle = () => {
-    if (!audioRef.current) return
-    if (playing) { audioRef.current.pause(); setPlaying(false) }
-    else { audioRef.current.play(); setPlaying(true) }
-  }
-
-  return (
-    <div>
-      <audio ref={audioRef} src={audioUrl} onEnded={() => setPlaying(false)} className="hidden" />
-      <button type="button" onClick={toggle}
-        className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-        {playing ? '⏸' : '🔊'} Listen
-      </button>
-    </div>
-  )
-}
-
 export default function LabourDashboard() {
   const { t } = useTranslation()
   const user = useAuthStore((s) => s.user)
   const updateUser = useAuthStore((s) => s.updateUser)
   const queryClient = useQueryClient()
+  const [isReady, setIsReady] = useState(user?.is_ready_for_work ?? true)
   const [searchTerm, setSearchTerm] = useState('')
+
+  useEffect(() => {
+    const lastDate = localStorage.getItem('agrisakhi_ready_date')
+    const today = new Date().toDateString()
+    if (lastDate !== today) {
+      localStorage.setItem('agrisakhi_ready_date', today)
+      setIsReady(false)
+      usersAPI.setReadyForWork(false).catch(() => {})
+    }
+  }, [])
+
+  const handleReadyToggle = async () => {
+    const newVal = !isReady
+    setIsReady(newVal)
+    if (newVal) localStorage.setItem('agrisakhi_ready_date', new Date().toDateString())
+    await usersAPI.setReadyForWork(newVal).catch(() => {})
+  }
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({ radius_km: 50, work_type: '', min_wage: 0 })
   const [selectedWorkTypes, setSelectedWorkTypes] = useState(['all'])
@@ -118,6 +114,7 @@ export default function LabourDashboard() {
         </div>
       )}
       <section className="overflow-hidden rounded-[28px] bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-300 px-5 py-6 text-slate-900 shadow-xl shadow-amber-100">
+
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-medium text-amber-900/80">{t('labourDashboard')}</p>
@@ -132,6 +129,21 @@ export default function LabourDashboard() {
           <span>{user?.village}, {user?.district}</span>
         </div>
       </section>
+
+      <div className={`flex items-center justify-between rounded-2xl border px-4 py-3 ${isReady ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'}`}>
+        <div>
+          <p className={`text-sm font-semibold ${isReady ? 'text-green-700' : 'text-gray-600'}`}>
+            {isReady ? '✅ Ready for Work Today' : '⭕ Not Available Today'}
+          </p>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {isReady ? 'Farmers can see you are available' : 'Turn on to receive job opportunities'}
+          </p>
+        </div>
+        <button type="button" onClick={handleReadyToggle}
+          className={`relative w-14 h-7 rounded-full transition-colors duration-200 ${isReady ? 'bg-green-500' : 'bg-gray-300'}`}>
+          <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform duration-200 ${isReady ? 'translate-x-7' : 'translate-x-0.5'}`} />
+        </button>
+      </div>
 
       <section className="grid grid-cols-2 gap-3">
         <article className="rounded-[24px] border border-amber-100 bg-amber-50 p-4">
@@ -187,15 +199,7 @@ export default function LabourDashboard() {
       <section className="space-y-3">
         {visibleJobs.length > 0 ? (
           visibleJobs.map((job) => (
-            <JobCard key={job.id} job={job} showDistance>
-              <div className="flex items-center justify-between">
-                {job.audio_url && <AudioButton audioUrl={job.audio_url} />}
-                <Link to={`/jobs/${job.id}`}
-                  className="ml-auto inline-flex items-center gap-1 rounded-2xl bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-amber-500 transition">
-                  View &amp; Apply →
-                </Link>
-              </div>
-            </JobCard>
+            <JobCard key={job.id} job={job} showDistance showActions />
           ))
         ) : (
           <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">

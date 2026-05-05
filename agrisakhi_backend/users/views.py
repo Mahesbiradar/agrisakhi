@@ -115,6 +115,18 @@ class LocationUpdateView(APIView):
         return Response({'status': 'location updated'})
 
 
+class ReadyForWorkView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        from datetime import date
+        is_ready = request.data.get('is_ready', True)
+        request.user.is_ready_for_work = is_ready
+        request.user.ready_until = date.today() if is_ready else None
+        request.user.save(update_fields=['is_ready_for_work', 'ready_until'])
+        return Response({'is_ready': is_ready})
+
+
 class NearbyUsersView(generics.ListAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -131,9 +143,12 @@ class NearbyUsersView(generics.ListAPIView):
         except (TypeError, ValueError):
             return Response({'error': 'Invalid lat/lng/radius_km'}, status=status.HTTP_400_BAD_REQUEST)
 
+        from datetime import date
         qs = User.objects.filter(is_active=True)
         if role:
             qs = qs.filter(role=role)
+        if role == 'labour':
+            qs = qs.filter(is_ready_for_work=True, ready_until=date.today())
         qs = qs.exclude(lat=None).exclude(lng=None)
 
         result = []

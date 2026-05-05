@@ -16,6 +16,13 @@ JOB_STATUS_CHOICES = [
     ('closed', 'Closed'),
 ]
 
+CLOSE_REASON_CHOICES = [
+    ('work_done', 'Work Done'),
+    ('found_workers', 'Found Workers'),
+    ('postponed', 'Postponed'),
+    ('other', 'Other'),
+]
+
 APPLICATION_STATUS_CHOICES = [
     ('pending', 'Pending'),
     ('accepted', 'Accepted'),
@@ -41,6 +48,8 @@ class Job(models.Model):
     lat = models.FloatField()
     lng = models.FloatField()
     status = models.CharField(max_length=10, choices=JOB_STATUS_CHOICES, default='open')
+    close_reason = models.CharField(max_length=50, blank=True, choices=CLOSE_REASON_CHOICES)
+    close_remark = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -77,6 +77,7 @@ export const usersAPI = {
   updateProfile: (data) => api.patch('/users/profile/', data),
   getNearby: (params) => api.get('/users/nearby/', { params }),
   updateLocation: (data) => api.post('/users/location/', data),
+  setReadyForWork: (is_ready) => api.post('/users/ready-for-work/', { is_ready }),
 }
 
 export const jobsAPI = {
@@ -87,6 +88,8 @@ export const jobsAPI = {
   apply: (jobId) => api.post(`/jobs/${jobId}/apply/`),
   getApplications: (jobId) => api.get(`/jobs/${jobId}/applications/`),
   updateApplication: (appId, data) => api.patch(`/jobs/applications/${appId}/`, data),
+  closeJob: (id, data) => api.post(`/jobs/${id}/close/`, data),
+  updateJob: (id, data) => api.put(`/jobs/${id}/`, data),
 }
 
 export const servicesAPI = {
@@ -94,6 +97,8 @@ export const servicesAPI = {
   create: (data) => api.post('/services/', data),
   getById: (id) => api.get(`/services/${id}/`),
   myServices: () => api.get('/services/my/'),
+  update: (id, data) => api.put(`/services/${id}/`, data),
+  delete: (id) => api.delete(`/services/${id}/`),
 }
 
 export const ratingsAPI = {

@@ -53,7 +53,14 @@ class ServiceListCreateView(generics.ListCreateAPIView):
             qs = qs.filter(category=category)
 
         if params.get('lat') and params.get('lng'):
-            services = _filter_by_location(qs, lat, lng, radius_km)
+            result = []
+            for obj in qs:
+                dist = haversine_km(lat, lng, obj.lat, obj.lng)
+                if dist <= obj.coverage_km:
+                    obj.distance = round(dist, 1)
+                    result.append(obj)
+            result.sort(key=lambda x: x.distance)
+            services = result
         else:
             services = list(qs)
 

@@ -22,7 +22,7 @@ export default function AddServicePage() {
   const user = useAuthStore((s) => s.user)
 
   const [formData, setFormData] = useState({
-    serviceName: '', category: 'machinery', description: '', priceInfo: '', available: true,
+    serviceName: '', category: 'machinery', description: '', priceInfo: '', available: true, coverageKm: 50,
   })
   const [imageUrl, setImageUrl] = useState('')
   const [error, setError] = useState('')
@@ -50,6 +50,7 @@ export default function AddServicePage() {
       price_info: formData.priceInfo,
       image_url: imageUrl,
       is_available: formData.available,
+      coverage_km: formData.coverageKm,
     })
   }
 
@@ -100,6 +101,18 @@ export default function AddServicePage() {
                 placeholder="e.g., INR 1200 per acre"
                 className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
                 required />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">Coverage Area</label>
+              <div className="flex gap-2">
+                {[10, 25, 50, 100].map((km) => (
+                  <button key={km} type="button" onClick={() => update('coverageKm', km)}
+                    className={`flex-1 rounded-2xl border py-3 text-sm font-semibold transition ${formData.coverageKm === km ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-600'}`}>
+                    {km} km
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>

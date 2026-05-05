@@ -34,6 +34,8 @@ class User(AbstractBaseUser):
     district = models.CharField(max_length=100, blank=True, null=True)
     lat = models.FloatField(null=True, blank=True)
     lng = models.FloatField(null=True, blank=True)
+    is_ready_for_work = models.BooleanField(default=True)
+    ready_until = models.DateField(null=True, blank=True)
     avatar_url = models.URLField(blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

@@ -1,4 +1,15 @@
+import { useQuery } from '@tanstack/react-query'
+import { adminAPI } from '../lib/api.js'
+
 export default function AppLayout({ children }) {
+  const { data } = useQuery({
+    queryKey: ['platform-stats'],
+    queryFn: adminAPI.getStats,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  })
+  const stats = data?.data
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-6xl mx-auto px-0 py-0 md:px-4 md:py-6 flex gap-6 justify-center">
@@ -28,15 +39,15 @@ export default function AppLayout({ children }) {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Active Jobs</span>
-                  <span className="font-medium text-green-700">—</span>
+                  <span className="font-medium text-green-700">{stats?.open_jobs ?? '—'}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Registered Farmers</span>
-                  <span className="font-medium text-green-700">—</span>
+                  <span className="font-medium text-green-700">{stats?.farmers ?? '—'}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Available Labour</span>
-                  <span className="font-medium text-green-700">—</span>
+                  <span className="font-medium text-green-700">{stats?.labours ?? '—'}</span>
                 </div>
               </div>
             </div>

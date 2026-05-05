@@ -101,6 +101,24 @@ export default function JobDetailPage() {
         </p>
       </div>
 
+      {job.farmer_phone && (
+        <div className="bg-green-50 rounded-2xl p-4">
+          <p className="text-sm font-medium text-green-800 mb-3">📞 Contact Farmer Directly</p>
+          <div className="flex gap-3">
+            <a href={`tel:+91${job.farmer_phone}`}
+              className="flex-1 bg-white border border-green-200 rounded-xl py-3 flex items-center justify-center gap-2 text-green-700 font-medium text-sm">
+              📞 Call Farmer
+            </a>
+            <a href={`https://wa.me/91${job.farmer_phone}`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex-1 bg-green-600 rounded-xl py-3 flex items-center justify-center gap-2 text-white font-medium text-sm">
+              💬 WhatsApp
+            </a>
+          </div>
+          <p className="text-xs text-gray-400 mt-2 text-center">Tap to connect with {job.farmer_name}</p>
+        </div>
+      )}
+
       {applied ? (
         <div className="flex items-center gap-3 rounded-[24px] border border-green-200 bg-green-50 px-5 py-4">
           <CheckCircle className="h-6 w-6 text-green-600" />

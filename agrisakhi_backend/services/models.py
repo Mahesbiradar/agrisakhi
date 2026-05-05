@@ -27,6 +27,7 @@ class ServiceListing(models.Model):
     district = models.CharField(max_length=100)
     lat = models.FloatField()
     lng = models.FloatField()
+    coverage_km = models.IntegerField(default=50, choices=[(10, '10 km'), (25, '25 km'), (50, '50 km'), (100, '100 km')])
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

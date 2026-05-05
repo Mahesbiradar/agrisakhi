@@ -1,5 +1,6 @@
 import math
 from rest_framework import generics, status
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -25,9 +26,9 @@ def _filter_by_location(qs, lat, lng, radius_km):
     for obj in qs:
         dist = haversine_km(lat, lng, obj.lat, obj.lng)
         if dist <= radius_km:
-            obj.distance = round(dist, 2)
+            obj.distanceKm = round(dist, 1)
             result.append(obj)
-    result.sort(key=lambda x: x.distance)
+    result.sort(key=lambda x: x.distanceKm)
     return result
 
 
@@ -152,3 +153,18 @@ class ApplicationUpdateView(generics.UpdateAPIView):
         super().check_object_permissions(request, obj)
         if obj.job.farmer != request.user:
             raise PermissionDenied('Only the job owner can update applications.')
+
+
+class JobCloseView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            job = Job.objects.get(pk=pk, farmer=request.user)
+        except Job.DoesNotExist:
+            return Response({'error': 'Job not found'}, status=status.HTTP_404_NOT_FOUND)
+        job.status = 'closed'
+        job.close_reason = request.data.get('reason', '')
+        job.close_remark = request.data.get('remark', '')
+        job.save()
+        return Response({'status': 'closed', 'message': 'Job closed successfully'})

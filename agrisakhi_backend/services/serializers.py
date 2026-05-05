@@ -11,7 +11,7 @@ class ServiceListingSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'provider', 'provider_name', 'service_name', 'category',
             'description', 'image_url', 'price_info', 'village', 'district',
-            'lat', 'lng', 'is_available', 'created_at', 'distance',
+            'lat', 'lng', 'coverage_km', 'is_available', 'created_at', 'distance',
         ]
         read_only_fields = ['id', 'provider', 'created_at']
         extra_kwargs = {

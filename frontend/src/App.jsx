@@ -6,6 +6,7 @@ import AdminDashboard from './pages/AdminDashboard.jsx'
 import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx'
 import JobDetailPage from './pages/JobDetailPage.jsx'
 import FarmerDashboard from './pages/FarmerDashboard.jsx'
+import ApplicationsPage from './pages/ApplicationsPage.jsx'
 import JobListPage from './pages/JobListPage.jsx'
 import LabourDashboard from './pages/LabourDashboard.jsx'
 import LandingPage from './pages/LandingPage.jsx'
@@ -48,6 +49,14 @@ function App() {
           element={
             <ProtectedRoute role="farmer">
               <JobListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/farmer/jobs/:id/applications"
+          element={
+            <ProtectedRoute role="farmer">
+              <ApplicationsPage />
             </ProtectedRoute>
           }
         />
