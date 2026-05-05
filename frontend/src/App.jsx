@@ -1,6 +1,9 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import LanguageToggle from './components/LanguageToggle.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import AddServicePage from './pages/AddServicePage.jsx'
+import AdminDashboard from './pages/AdminDashboard.jsx'
+import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx'
 import JobDetailPage from './pages/JobDetailPage.jsx'
 import FarmerDashboard from './pages/FarmerDashboard.jsx'
 import JobListPage from './pages/JobListPage.jsx'
@@ -15,10 +18,14 @@ import RegisterPage from './pages/RegisterPage.jsx'
 function App() {
   return (
     <HashRouter>
+      <div className="fixed top-3 right-3 z-50">
+        <LanguageToggle />
+      </div>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         <Route
           path="/farmer"
@@ -81,6 +88,14 @@ function App() {
           element={
             <ProtectedRoute>
               <JobDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />

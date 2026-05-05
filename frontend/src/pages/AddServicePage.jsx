@@ -34,7 +34,7 @@ export default function AddServicePage() {
       navigate('/provider', { replace: true })
     },
     onError: (err) => {
-      setError(err.response?.data?.detail || 'Failed to list service. Try again.')
+      setError(err.userMessage || 'Failed to list service. Try again.')
     },
   })
 
@@ -54,16 +54,14 @@ export default function AddServicePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <button type="button" onClick={() => navigate(-1)}
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div>
-          <p className="text-sm font-medium text-blue-700">Provider Listing</p>
-          <h1 className="text-2xl font-black text-slate-900">{t('addService')}</h1>
-        </div>
+    <div className="space-y-6 pt-16">
+      <button type="button" onClick={() => navigate(-1)}
+        className="fixed left-4 top-4 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow text-slate-600 hover:shadow-md transition">
+        ←
+      </button>
+      <div>
+        <p className="text-sm font-medium text-blue-700">Provider Listing</p>
+        <h1 className="text-2xl font-black text-slate-900">{t('addService')}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">

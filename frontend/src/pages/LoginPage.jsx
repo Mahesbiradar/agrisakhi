@@ -2,6 +2,7 @@ import { ArrowLeft, Leaf, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import PhoneInput from '../components/PhoneInput.jsx'
 import { authAPI } from '../lib/api.js'
 import useAuthStore from '../store/authStore.js'
 import { getDashboardPath } from '../utils/auth.js'
@@ -25,8 +26,8 @@ export default function LoginPage() {
       const res = await authAPI.login({ phone: phone.trim(), password })
       setAuth(res.data.user, res.data.access, res.data.refresh)
       navigate(getDashboardPath(res.data.user.role), { replace: true })
-    } catch {
-      setError(t('invalidCreds'))
+    } catch (err) {
+      setError(err.userMessage || t('invalidCreds'))
     } finally {
       setLoading(false)
     }
@@ -53,10 +54,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="mt-10 space-y-5">
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="phone">{t('phone')}</label>
-            <input id="phone" type="tel" inputMode="numeric" maxLength={10} value={phone}
-              onChange={(e) => { setPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); setError('') }}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base text-slate-900 outline-none ring-0 placeholder:text-slate-400 focus:border-green-500"
-              placeholder="Enter 10 digit mobile number" required />
+            <PhoneInput id="phone" value={phone} onChange={(v) => { setPhone(v); setError('') }} required />
           </div>
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="password">{t('password')}</label>
@@ -74,6 +72,11 @@ export default function LoginPage() {
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 py-4 text-base font-semibold text-white shadow-lg shadow-green-100 transition hover:bg-green-700 disabled:opacity-60">
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {t('login')}
+          </button>
+
+          <button type="button" onClick={() => navigate('/forgot-password')}
+            className="mt-2 w-full text-center text-sm text-green-700 underline">
+            {t('forgotPassword')}
           </button>
         </form>
 

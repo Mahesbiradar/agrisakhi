@@ -20,13 +20,13 @@
 
 
 ## Bug Fixes & Improvements (before deployment)
-- [ ] FIX01 — CORS fix + proper error messages
-- [ ] FIX02 — Location detection: free text district, full address
-- [ ] FIX03 — Forgot password flow
-- [ ] FIX04 — Language toggle fixed + visible all pages
-- [ ] FIX05 — Responsive layout (mobile + tablet + desktop)
-- [ ] FIX06 — Admin role + admin dashboard
-- [ ] FIX07 — UX polish across all pages
+- [x] FIX01 — CORS fix + proper error messages
+- [x] FIX02 — Location detection: free text district, full address
+- [x] FIX03 — Forgot password flow
+- [x] FIX04 — Language toggle fixed + visible all pages
+- [x] FIX05 — Responsive layout (mobile + tablet + desktop)
+- [x] FIX06 — Admin role + admin dashboard
+- [x] FIX07 — UX polish across all pages
 
 
 ## Deployment (after all above done)

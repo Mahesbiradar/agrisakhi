@@ -1,6 +1,6 @@
 # Current Status
 
-Last completed: F08 — All frontend tests passing (6/6), npm run build 0 errors
+Last completed: FIX01–FIX07 — All bug fixes and improvements complete, npm run build 0 errors
 Next task: D01 — Railway backend deploy
 
 ## Frontend state
@@ -43,6 +43,15 @@ Run tests: python manage.py test --settings=agrisakhi_backend.test_settings
 
 Migrations: created but not yet applied to PostgreSQL (no local PG instance).
 Production migrate will run on Railway deployment.
+
+## Bug Fixes Applied (FIX01–FIX07)
+- FIX01: CORS fixed (CorsMiddleware is now first, all localhost ports allowed), api.js error interceptor extracts userMessage from Django responses
+- FIX02: detectLocation() returns county/state_district for district, plus state for Karnataka validation; RegisterPage uses free-text inputs with GPS hint
+- FIX03: Forgot password flow (phone verify → set new password → success) — backend views + ForgotPasswordPage.jsx + /forgot-password route
+- FIX04: LanguageToggle rewritten as pill buttons, placed globally in App.jsx (fixed top-right z-50), removed from BottomNav
+- FIX05: AppLayout.jsx created (mobile full-width, tablet centered 520px, desktop two-column with sidebar); ProtectedRoute wraps all pages with AppLayout
+- FIX06: 'admin' role added to User model (migration 0002), AdminDashboard.jsx (4 tabs: Overview/Users/Jobs/Services), create_admin management command (phone: 0000000000, password: agrisakhi_admin_2024)
+- FIX07: PhoneInput.jsx (+91 prefix), SkeletonCard.jsx, FarmerDashboard FAB + count badges, LabourDashboard horizontal chip filter + View & Apply button, ProviderDashboard first-service banner, ProfilePage Help & Support section, fixed back buttons on PostJobPage/AddServicePage
 
 ## Known Issues
 None.

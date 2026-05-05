@@ -21,6 +21,7 @@ ROLE_CHOICES = [
     ('farmer', 'Farmer'),
     ('labour', 'Labour'),
     ('provider', 'Provider'),
+    ('admin', 'Admin'),
 ]
 
 

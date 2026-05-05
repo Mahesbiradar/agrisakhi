@@ -104,5 +104,16 @@
   "connectionError": "Could not load data. Check connection.",
   "retry": "Retry",
   "loading": "Loading...",
-  "languageToggleHint": "Language / ಭಾಷೆ — use toggle in bottom nav"
+  "languageToggleHint": "Language / ಭಾಷೆ — use toggle in bottom nav",
+  "forgotPassword": "Forgot Password?",
+  "resetPassword": "Reset Password",
+  "verifyPhone": "Verify Phone",
+  "setNewPassword": "Set New Password",
+  "confirmPassword": "Confirm Password",
+  "passwordMismatch": "Passwords do not match.",
+  "passwordTooShort": "Password must be at least 6 characters.",
+  "phoneVerified": "Phone verified",
+  "passwordResetSuccess": "Password reset successfully!",
+  "loginNow": "Login Now",
+  "newPassword": "New Password"
 }

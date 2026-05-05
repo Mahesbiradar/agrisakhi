@@ -1,4 +1,5 @@
 import { ArrowLeft, CheckCircle, Leaf, Loader2, MapPin, Truck, UserRound, Users } from 'lucide-react'
+import PhoneInput from '../components/PhoneInput.jsx'
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -68,8 +69,7 @@ export default function RegisterPage() {
       setAuth(res.data.user, res.data.access, res.data.refresh)
       navigate(getDashboardPath(res.data.user.role), { replace: true })
     } catch (err) {
-      const msg = err.response?.data?.phone?.[0] || err.response?.data?.detail || t('phoneRegistered')
-      setError(msg)
+      setError(err.userMessage || t('phoneRegistered'))
     } finally {
       setSubmitting(false)
     }
@@ -111,10 +111,7 @@ export default function RegisterPage() {
             </div>
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="phone">{t('phone')}</label>
-              <input id="phone" type="tel" inputMode="numeric" maxLength={10} value={formData.phone}
-                onChange={(e) => update('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-green-500"
-                placeholder="Enter 10 digit mobile number" required />
+              <PhoneInput id="phone" value={formData.phone} onChange={(v) => update('phone', v)} required />
             </div>
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="password">{t('password')}</label>
@@ -156,19 +153,30 @@ export default function RegisterPage() {
               {detecting ? t('detecting') : locationDone ? t('locationDetected') : t('detectLocation')}
             </button>
 
+            {locationDone && !locationWarning && (
+              <p className="text-xs text-slate-500">📍 Detected from GPS — you can edit if needed</p>
+            )}
+            {locationWarning && (
+              <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">{locationWarning}</p>
+            )}
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="village">{t('village')}</label>
               <input id="village" type="text" value={formData.village}
                 onChange={(e) => update('village', e.target.value)}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-green-500"
-                placeholder="Enter your village" required />
+                placeholder="e.g. Nagarabhavi, Hebbal" required />
             </div>
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="district">{t('district')}</label>
-              <select id="district" value={formData.district} onChange={(e) => update('district', e.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base text-slate-900 outline-none focus:border-green-500">
-                {districts.map((d) => <option key={d} value={d}>{d}</option>)}
-              </select>
+              <input id="district" type="text" value={formData.district}
+                onChange={(e) => update('district', e.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-green-500"
+                placeholder="e.g. Bengaluru Urban, Mysuru, Shimoga" required />
+              <button type="button" onClick={() => document.getElementById('village').focus()}
+                className="mt-1 text-xs text-green-700 underline">
+                Enter manually instead
+              </button>
             </div>
 
             {error && (

@@ -1,5 +1,5 @@
 import { BriefcaseBusiness, CirclePlus, MapPin, RefreshCw, Tractor, Users } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import PageSkeleton from '../components/PageSkeleton.jsx'
@@ -24,6 +24,7 @@ function SkeletonCards() {
 
 export default function FarmerDashboard() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
 
   const { data: labourRes, isLoading: loadingLabour, isError: errLabour, refetch: refetchLabour } = useQuery({
@@ -79,10 +80,20 @@ export default function FarmerDashboard() {
         </div>
       </section>
 
+      <button type="button" onClick={() => navigate('/farmer/post-job')}
+        className="fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white text-2xl shadow-lg shadow-green-200 hover:bg-green-700 active:scale-95 transition-all">
+        +
+      </button>
+
       <section>
-        <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-green-700" />
-          <h2 className="text-lg font-bold text-slate-900">{t('nearbyLabour')}</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-green-700" />
+            <h2 className="text-lg font-bold text-slate-900">{t('nearbyLabour')}</h2>
+          </div>
+          {nearbyLabour.length > 0 && (
+            <span className="rounded-full bg-green-50 px-2 py-1 text-xs text-green-600">{nearbyLabour.length} found</span>
+          )}
         </div>
         {loadingLabour ? (
           <div className="mt-4"><SkeletonCards /></div>
@@ -106,9 +117,14 @@ export default function FarmerDashboard() {
       </section>
 
       <section>
-        <div className="flex items-center gap-2">
-          <Tractor className="h-5 w-5 text-green-700" />
-          <h2 className="text-lg font-bold text-slate-900">{t('nearbyServices')}</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Tractor className="h-5 w-5 text-green-700" />
+            <h2 className="text-lg font-bold text-slate-900">{t('nearbyServices')}</h2>
+          </div>
+          {nearbyServices.length > 0 && (
+            <span className="rounded-full bg-green-50 px-2 py-1 text-xs text-green-600">{nearbyServices.length} found</span>
+          )}
         </div>
         {loadingServices ? (
           <div className="mt-4 space-y-3">

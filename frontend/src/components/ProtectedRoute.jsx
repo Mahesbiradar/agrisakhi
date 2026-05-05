@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom'
 import useAuthStore from '../store/authStore.js'
 import { getDashboardPath } from '../utils/auth.js'
+import AppLayout from './AppLayout.jsx'
 import BottomNav from './BottomNav.jsx'
 
 export default function ProtectedRoute({ children, role }) {
@@ -14,10 +15,20 @@ export default function ProtectedRoute({ children, role }) {
     return <Navigate to={getDashboardPath(user.role)} replace />
   }
 
+  if (user.role === 'admin') {
+    return (
+      <AppLayout>
+        <div className="min-h-screen px-4 pb-6 pt-4">{children}</div>
+      </AppLayout>
+    )
+  }
+
   return (
-    <div className="page-container">
-      <div className="min-h-screen px-4 pb-24 pt-4">{children}</div>
-      <BottomNav />
-    </div>
+    <AppLayout>
+      <div className="min-h-screen px-4 pb-24 pt-4">
+        {children}
+        <BottomNav />
+      </div>
+    </AppLayout>
   )
 }

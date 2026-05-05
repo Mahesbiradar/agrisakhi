@@ -178,6 +178,23 @@ export default function ProfilePage() {
         </div>
       </section>
 
+      <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-bold text-slate-900">Help &amp; Support</h2>
+        <div className="mt-4 space-y-3">
+          <a href="tel:18001801551"
+            className="flex items-center gap-3 rounded-2xl bg-green-50 px-4 py-4">
+            <span className="text-xl">📞</span>
+            <div>
+              <p className="font-semibold text-green-800">Kisan Call Center</p>
+              <p className="text-sm text-green-700">1800-180-1551 (Toll Free)</p>
+            </div>
+          </a>
+          <div className="rounded-2xl bg-slate-50 px-4 py-4">
+            <p className="text-sm text-slate-600">For technical issues, contact your nearest agriculture extension officer or AgriSakhi coordinator.</p>
+          </div>
+        </div>
+      </section>
+
       <BottomSheet isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} title="About AgriSakhi">
         <p className="text-sm leading-7 text-slate-600">
           AgriSakhi is a mobile-first app that helps farmers, labourers, and service providers connect locally.

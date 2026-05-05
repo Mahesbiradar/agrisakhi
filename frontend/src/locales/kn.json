@@ -104,5 +104,16 @@
   "connectionError": "ಡೇಟಾ ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ. ಸಂಪರ್ಕ ಪರಿಶೀಲಿಸಿ.",
   "retry": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
   "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
-  "languageToggleHint": "ಭಾಷೆ — ಕೆಳಗಿನ ನ್ಯಾವ್‌ನಲ್ಲಿ ಟಾಗಲ್ ಬಳಸಿ"
+  "languageToggleHint": "ಭಾಷೆ — ಕೆಳಗಿನ ನ್ಯಾವ್‌ನಲ್ಲಿ ಟಾಗಲ್ ಬಳಸಿ",
+  "forgotPassword": "ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿರಾ?",
+  "resetPassword": "ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸಿ",
+  "verifyPhone": "ಮೊಬೈಲ್ ಪರಿಶೀಲಿಸಿ",
+  "setNewPassword": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ಹೊಂದಿಸಿ",
+  "confirmPassword": "ಪಾಸ್‌ವರ್ಡ್ ದೃಢೀಕರಿಸಿ",
+  "passwordMismatch": "ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಹೊಂದುತ್ತಿಲ್ಲ.",
+  "passwordTooShort": "ಪಾಸ್‌ವರ್ಡ್ ಕನಿಷ್ಠ 6 ಅಕ್ಷರಗಳಿರಬೇಕು.",
+  "phoneVerified": "ಮೊಬೈಲ್ ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
+  "passwordResetSuccess": "ಪಾಸ್‌ವರ್ಡ್ ಯಶಸ್ವಿಯಾಗಿ ಮರುಹೊಂದಿಸಲಾಗಿದೆ!",
+  "loginNow": "ಈಗ ಲಾಗಿನ್ ಮಾಡಿ",
+  "newPassword": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್"
 }
