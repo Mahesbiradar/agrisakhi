@@ -3,13 +3,13 @@ import {
 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import BottomSheet from '../components/BottomSheet.jsx'
 import JobCard from '../components/JobCard.jsx'
 import PageSkeleton from '../components/PageSkeleton.jsx'
 import useAuthStore from '../store/authStore.js'
-import { jobsAPI } from '../lib/api.js'
+import { jobsAPI, usersAPI } from '../lib/api.js'
 
 const waveEmoji = '\u{1F44B}'
 const jobEmoji = '\u{1F33E}'
@@ -45,6 +45,8 @@ function AudioButton({ audioUrl }) {
 export default function LabourDashboard() {
   const { t } = useTranslation()
   const user = useAuthStore((s) => s.user)
+  const updateUser = useAuthStore((s) => s.updateUser)
+  const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({ radius_km: 50, work_type: '', min_wage: 0 })
@@ -58,6 +60,20 @@ export default function LabourDashboard() {
     enabled: !!user,
     keepPreviousData: true,
   })
+
+  const handleEnableLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        usersAPI.updateLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+          .then(() => {
+            updateUser({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+            queryClient.invalidateQueries({ queryKey: ['jobs'] })
+          })
+          .catch(() => {})
+      },
+      () => {},
+    )
+  }
 
   if (isLoading) return <PageSkeleton variant="list" />
 
@@ -92,6 +108,15 @@ export default function LabourDashboard() {
 
   return (
     <div className="space-y-6 pb-4">
+      {!user?.lat && (
+        <div className="flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <p className="text-sm font-medium text-amber-900">📍 Enable location to see nearby jobs</p>
+          <button type="button" onClick={handleEnableLocation}
+            className="rounded-xl bg-amber-400 px-3 py-2 text-xs font-semibold text-slate-900">
+            Enable Now
+          </button>
+        </div>
+      )}
       <section className="overflow-hidden rounded-[28px] bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-300 px-5 py-6 text-slate-900 shadow-xl shadow-amber-100">
         <div className="flex items-start justify-between gap-4">
           <div>

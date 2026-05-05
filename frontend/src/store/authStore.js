@@ -12,6 +12,14 @@ const useAuthStore = create((set) => ({
     set({ user, accessToken, isLoggedIn: true })
   },
 
+  updateUser: (updates) => {
+    set((state) => {
+      const user = { ...state.user, ...updates }
+      localStorage.setItem('agrisakhi_user', JSON.stringify(user))
+      return { user }
+    })
+  },
+
   clearAuth: () => {
     localStorage.removeItem('agrisakhi_access')
     localStorage.removeItem('agrisakhi_refresh')

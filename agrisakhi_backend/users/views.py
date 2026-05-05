@@ -102,6 +102,19 @@ class ResetPasswordView(APIView):
             return Response({'error': 'User not found'}, status=404)
 
 
+class LocationUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        lat = request.data.get('lat')
+        lng = request.data.get('lng')
+        if lat and lng:
+            request.user.lat = float(lat)
+            request.user.lng = float(lng)
+            request.user.save(update_fields=['lat', 'lng'])
+        return Response({'status': 'location updated'})
+
+
 class NearbyUsersView(generics.ListAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]

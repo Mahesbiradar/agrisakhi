@@ -1,13 +1,14 @@
 from django.urls import path
 from .views import (
     RegisterView, LoginView, UserProfileView, NearbyUsersView,
-    ForgotPasswordView, ResetPasswordView,
+    ForgotPasswordView, ResetPasswordView, LocationUpdateView,
     AdminStatsView, AdminUsersView, AdminUserToggleView, AdminPasswordResetView,
     AdminJobsView, AdminJobCloseView, AdminServicesView,
 )
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
+    path('location/', LocationUpdateView.as_view(), name='location-update'),
     path('login/', LoginView.as_view(), name='login'),
     path('profile/', UserProfileView.as_view(), name='profile'),
     path('nearby/', NearbyUsersView.as_view(), name='nearby-users'),

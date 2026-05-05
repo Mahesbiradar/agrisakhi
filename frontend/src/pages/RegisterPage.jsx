@@ -1,4 +1,4 @@
-import { ArrowLeft, CheckCircle, Leaf, Loader2, MapPin, Truck, UserRound, Users } from 'lucide-react'
+import { ArrowLeft, Leaf, Loader2, MapPin, Truck, UserRound, Users } from 'lucide-react'
 import PhoneInput from '../components/PhoneInput.jsx'
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import { authAPI } from '../lib/api.js'
 import useAuthStore from '../store/authStore.js'
 import { getDashboardPath } from '../utils/auth.js'
-import { detectLocation } from '../utils/location.js'
 
 const roleOptions = [
   { value: 'farmer', label: 'Farmer', icon: UserRound, description: 'Hire workers and manage farm needs' },
@@ -27,53 +26,34 @@ export default function RegisterPage() {
     name: '', phone: '', password: '', role: initialRole,
     village: '', district: '', lat: null, lng: null,
   })
-  const [detecting, setDetecting] = useState(false)
-  const [locationDone, setLocationDone] = useState(false)
-  const [locationWarning, setLocationWarning] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
   const update = (field, value) => setFormData((f) => ({ ...f, [field]: value }))
 
-  const handleDetect = async () => {
-    setDetecting(true)
-    setError('')
-    setLocationWarning('')
-    try {
-      const loc = await detectLocation()
-      setFormData((f) => ({
-        ...f,
-        lat: loc.lat, lng: loc.lng,
-        village: loc.village || f.village,
-        district: loc.district || f.district,
-      }))
-      setLocationDone(true)
-      if (loc.state && !loc.state.toLowerCase().includes('karnataka')) {
-        setLocationWarning(`⚠️ You appear to be outside Karnataka (detected: ${loc.state}). Please verify your location.`)
-      }
-    } catch {
-      setError('Could not detect location. Please enter manually.')
-    } finally {
-      setDetecting(false)
-    }
-  }
-
   const handleNext = (e) => { e.preventDefault(); setStep(2) }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const doRegister = async (lat, lng) => {
     setSubmitting(true)
     setError('')
     try {
-      const res = await authAPI.register(formData)
+      const res = await authAPI.register({ ...formData, lat, lng, village: '', district: '' })
       setAuth(res.data.user, res.data.access, res.data.refresh)
       navigate(getDashboardPath(res.data.user.role), { replace: true })
     } catch (err) {
       setError(err.userMessage || t('phoneRegistered'))
-    } finally {
       setSubmitting(false)
     }
   }
+
+  const handleAllowLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => doRegister(pos.coords.latitude, pos.coords.longitude),
+      () => doRegister(null, null),
+    )
+  }
+
+  const handleSkipLocation = () => doRegister(null, null)
 
   return (
     <div className="page-container bg-gradient-to-b from-green-50 via-white to-white">
@@ -146,49 +126,33 @@ export default function RegisterPage() {
             </button>
           </form>
         ) : (
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-            <button type="button" onClick={handleDetect} disabled={detecting}
-              className={`flex w-full items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition ${locationDone ? 'border-green-300 bg-green-50 text-green-700' : 'border-slate-200 bg-white text-slate-700'}`}>
-              {detecting ? <Loader2 className="h-4 w-4 animate-spin" /> : locationDone ? <CheckCircle className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}
-              {detecting ? t('detecting') : locationDone ? t('locationDetected') : t('detectLocation')}
-            </button>
-
-            {locationDone && !locationWarning && (
-              <p className="text-xs text-slate-500">📍 Detected from GPS — you can edit if needed</p>
-            )}
-            {locationWarning && (
-              <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">{locationWarning}</p>
-            )}
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="village">{t('village')}</label>
-              <input id="village" type="text" value={formData.village}
-                onChange={(e) => update('village', e.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-green-500"
-                placeholder="e.g. Nagarabhavi, Hebbal" required />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="district">{t('district')}</label>
-              <input id="district" type="text" value={formData.district}
-                onChange={(e) => update('district', e.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-green-500"
-                placeholder="e.g. Bengaluru Urban, Mysuru, Shimoga" required />
-              <button type="button" onClick={() => document.getElementById('village').focus()}
-                className="mt-1 text-xs text-green-700 underline">
-                Enter manually instead
-              </button>
+          <div className="mt-8 space-y-5">
+            <div className="flex flex-col items-center text-center">
+              <div className="text-8xl leading-none">📍</div>
+              <h2 className="mt-5 text-2xl font-black text-slate-900">Allow Location Access</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                AgriSakhi uses your location to show nearby jobs and workers
+              </p>
+              <p className="mt-1 text-sm text-slate-500">
+                ಹತ್ತಿರದ ಕೆಲಸಗಳನ್ನು ತೋರಿಸಲು ನಿಮ್ಮ ಸ್ಥಳ ಬೇಕಾಗುತ್ತದೆ
+              </p>
             </div>
 
             {error && (
               <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">{error}</p>
             )}
 
-            <button type="submit" disabled={submitting}
+            <button type="button" onClick={handleAllowLocation} disabled={submitting}
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 py-4 text-base font-semibold text-white shadow-lg shadow-green-100 transition hover:bg-green-700 disabled:opacity-60">
-              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {t('createAccount')}
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
+              Allow Location &amp; Create Account
             </button>
-          </form>
+
+            <button type="button" onClick={handleSkipLocation} disabled={submitting}
+              className="w-full text-center text-sm text-slate-500 underline disabled:opacity-60">
+              Skip location for now
+            </button>
+          </div>
         )}
 
         <p className="mt-6 text-center text-sm text-slate-600">

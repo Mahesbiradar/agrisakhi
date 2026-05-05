@@ -76,6 +76,7 @@ export const usersAPI = {
   getProfile: () => api.get('/users/profile/'),
   updateProfile: (data) => api.patch('/users/profile/', data),
   getNearby: (params) => api.get('/users/nearby/', { params }),
+  updateLocation: (data) => api.post('/users/location/', data),
 }
 
 export const jobsAPI = {

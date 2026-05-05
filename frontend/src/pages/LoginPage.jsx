@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import PhoneInput from '../components/PhoneInput.jsx'
-import { authAPI } from '../lib/api.js'
+import { authAPI, usersAPI } from '../lib/api.js'
 import useAuthStore from '../store/authStore.js'
 import { getDashboardPath } from '../utils/auth.js'
 
@@ -25,6 +25,12 @@ export default function LoginPage() {
     try {
       const res = await authAPI.login({ phone: phone.trim(), password })
       setAuth(res.data.user, res.data.access, res.data.refresh)
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          usersAPI.updateLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }).catch(() => {})
+        },
+        () => {},
+      )
       navigate(getDashboardPath(res.data.user.role), { replace: true })
     } catch (err) {
       setError(err.userMessage || t('invalidCreds'))

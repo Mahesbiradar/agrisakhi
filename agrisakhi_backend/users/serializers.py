@@ -6,6 +6,8 @@ User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
+    village = serializers.CharField(required=False, default='', allow_blank=True)
+    district = serializers.CharField(required=False, default='', allow_blank=True)
 
     class Meta:
         model = User
