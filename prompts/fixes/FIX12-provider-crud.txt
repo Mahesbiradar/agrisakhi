@@ -1,0 +1,66 @@
+Project: AgriSakhi
+Task: Service provider full CRUD + area coverage per service
+
+--- BACKEND ---
+
+In services/models.py ServiceListing add:
+  coverage_km = IntegerField(default=50, 
+    choices=[(10,10),(25,25),(50,50),(100,100)])
+
+Run migrations.
+
+In services/views.py ServiceDetailView:
+PUT: provider can edit their own service (all fields)
+DELETE: provider can delete their own service
+
+In services/views.py ServiceListCreateView GET:
+Use coverage_km from each service for filtering:
+  Only return service if distance < service.coverage_km
+  (currently uses fixed 60km — replace with per-service coverage)
+
+Add to src/lib/api.js servicesAPI:
+  update: (id, data) => api.put(`/services/${id}/`, data),
+  delete: (id) => api.delete(`/services/${id}/`),
+
+--- FRONTEND ---
+
+src/pages/AddServicePage.jsx — add coverage_km field:
+After price_info field add:
+  Label: "Coverage Area"
+  4 chip options (single select): 10 km | 25 km | 50 km | 100 km
+  Default: 50 km selected
+  Store as coverageKm state, include in submit payload.
+
+src/pages/ProviderDashboard.jsx — UPDATE service cards:
+
+Each service card shows:
+  TOP: service_name in font-semibold + category chip
+  Description (2 lines truncated)
+  Price: "₹ {price_info}" in green
+  Coverage: "📍 {coverage_km} km radius" badge
+  Available toggle (real — calls API to toggle is_available)
+  
+  Action buttons row:
+    "Edit" blue outlined → opens EditServiceBottomSheet
+    "Delete" red outlined → shows confirm dialog
+
+Create EditServiceBottomSheet (inside ProviderDashboard or separate component):
+A BottomSheet with form:
+  Fields: service_name, category, description, price_info, coverage_km, is_available
+  Pre-filled with existing service data
+  "Save Changes" button → servicesAPI.update(service.id, data)
+  On success: close sheet, show toast, invalidate ['my-services'] query
+
+Delete confirmation:
+  When "Delete" tapped: show a simple confirm dialog (not browser confirm()):
+  BottomSheet with:
+    "Delete this service?"
+    Service name shown in red
+    "Cancel" + "Yes, Delete" red button
+    On confirm: servicesAPI.delete(service.id) → toast → refresh list
+
+Available toggle on card:
+  const toggleMutation = useMutation(
+    (id) => servicesAPI.update(id, {is_available: !service.is_available}),
+    { onSuccess: () => queryClient.invalidateQueries(['my-services']) }
+  )

@@ -1,0 +1,85 @@
+Project: AgriSakhi
+Task: Build complete Profile page for all roles
+
+src/pages/ProfilePage.jsx — FULL REWRITE
+
+Data sources:
+  const { data: profile } = useQuery(['profile'], usersAPI.getProfile)
+  const { clearAuth } = useAuthStore()
+  const { t, i18n } = useTranslation()
+
+Layout (scrollable, pb-24 for bottom nav):
+
+--- SECTION 1: Profile Header card ---
+  Role-colored gradient card (farmer=green, labour=amber, provider=blue):
+  
+  Center:
+    Avatar circle (80px) with role color bg, white initial letter (48px font)
+    Name (20px bold white)
+    Role badge (white pill with role text)
+    "📍 Village, District" in white/80 opacity (if available)
+
+--- SECTION 2: Stats row (role-specific) ---
+  3 equal cards in a row:
+  
+  Farmer:
+    Jobs Posted | Applications Received | Open Jobs
+  Labour:  
+    Jobs Applied | Accepted | Ready Status (ON/OFF)
+  Provider:
+    Services Listed | Active Services | Coverage
+  
+  Each stat card: gray-50 bg, number in green bold, label in gray-500 text-xs
+
+--- SECTION 3: Personal Info card ---
+  White card, rounded-2xl, shadow-sm:
+  Rows with icon + label + value:
+    📱 Phone: +91 {profile.phone}
+    👤 Role: {role badge}
+    📍 Location: {village}, {district} — with "Refresh" link
+    📅 Member since: {formatted date}
+  
+  "Refresh Location" link:
+    Calls geolocation → updateLocation API → shows "Location updated" toast
+
+--- SECTION 4: Edit Profile card ---
+  Expandable section (tap "Edit Profile" to expand):
+  When expanded shows inline form:
+    Name input (pre-filled)
+    "Save" green button → usersAPI.updateProfile({name})
+    "Cancel" link
+  
+  Note: phone cannot be changed (shown as read-only)
+
+--- SECTION 5: Change Password card ---
+  Expandable section:
+  When expanded:
+    Current password input
+    New password input (min 6 chars)
+    Confirm new password input
+    "Update Password" button
+    Calls: api.post('/users/reset-password/', {phone, new_password})
+    On success: toast "Password updated" + collapse section
+
+--- SECTION 6: Settings card ---
+  White card:
+  
+  Language row:
+    "Language / ಭಾಷೆ" label
+    Inline LanguageToggle component (EN | ಕನ್ನಡ pill)
+    Remove the "Use toggle in bottom nav" text — toggle is HERE now
+    Also keep the fixed top-right toggle for quick access
+  
+  About AgriSakhi:
+    Tap → shows BottomSheet with:
+    App description, version "v2.0 Phase 2", 
+    "Built for Karnataka farmers"
+    Kisan helpline: 1800-180-1551
+
+--- SECTION 7: Logout ---
+  Full-width red outlined button: "Logout"
+  On tap: show confirmation "Are you sure you want to logout?"
+  Two buttons: Cancel | Logout
+  On confirm: clearAuth() → navigate('/')
+
+npm run build — 0 errors.

@@ -1,0 +1,92 @@
+Project: AgriSakhi
+Task: Simplify registration + auto-capture location on login
+
+GOAL: Remove village/district fields from registration entirely.
+Capture GPS silently. Update location on every login.
+
+--- BACKEND ---
+
+In users/models.py:
+Make village and district optional (blank=True, null=True).
+Keep lat and lng as FloatField null=True blank=True.
+Run: python manage.py makemigrations && python manage.py migrate
+  --settings=agrisakhi_backend.local_settings
+
+In users/serializers.py RegisterSerializer:
+Remove village and district from required fields.
+Make them optional with default=''.
+
+In users/views.py add LocationUpdateView:
+class LocationUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        lat = request.data.get('lat')
+        lng = request.data.get('lng')
+        if lat and lng:
+            request.user.lat = float(lat)
+            request.user.lng = float(lng)
+            # Reverse geocode to update village/district
+            # Just save lat/lng — frontend handles display
+            request.user.save(update_fields=['lat', 'lng'])
+        return Response({'status': 'location updated'})
+
+Add to users/urls.py:
+  path('location/', LocationUpdateView.as_view()),
+
+--- FRONTEND: Registration ---
+
+src/pages/RegisterPage.jsx — REWRITE to 2 simple steps:
+
+Step 1:
+  - Full Name input
+  - Phone input (PhoneInput component +91)
+  - Password input
+  - Role selector (3 cards: Farmer / Labour / Provider)
+  - "Next →" button
+
+Step 2:
+  - Heading: "Allow Location Access"
+  - Large location pin icon (📍) centered, 80px
+  - Text: "AgriSakhi uses your location to show nearby jobs and workers"
+  - Kannada: "ಹತ್ತಿರದ ಕೆಲಸಗಳನ್ನು ತೋರಿಸಲು ನಿಮ್ಮ ಸ್ಥಳ ಬೇಕಾಗುತ್ತದೆ"
+  - Big green button: "Allow Location & Create Account"
+    On tap:
+      1. Call navigator.geolocation.getCurrentPosition()
+      2. On success: register with {name, phone, password, role, lat, lng, village:'', district:''}
+      3. On denied: register with {name, phone, password, role, lat:null, lng:null, village:'', district:''}
+  - Small link below: "Skip location for now" → registers without coordinates
+  - Show spinner while registering
+
+No village input. No district input. No dropdown. Completely removed.
+
+--- FRONTEND: Login location update ---
+
+src/pages/LoginPage.jsx:
+After successful login (auth token received):
+  Silently call geolocation in background (do NOT await, do NOT block UI):
+  
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      usersAPI.updateLocation({
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude
+      }).catch(() => {}) // silently ignore errors
+    },
+    () => {} // silently ignore if denied
+  )
+  
+  Then immediately navigate to dashboard — don't wait for location.
+
+Add to src/lib/api.js in usersAPI:
+  updateLocation: (data) => api.post('/users/location/', data),
+
+--- FRONTEND: Dashboard location refresh ---
+
+In FarmerDashboard.jsx and LabourDashboard.jsx:
+On component mount, if user.lat is null:
+  Show a yellow banner at top:
+  "📍 Enable location to see nearby jobs"
+  Button "Enable Now" → triggers geolocation → calls updateLocation → 
+  invalidates React Query cache → page refetches with new location
+
+If location exists, no banner shown.

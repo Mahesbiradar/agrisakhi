@@ -1,0 +1,66 @@
+Project: AgriSakhi
+Task: Connect sidebar Platform Stats to real admin API + fix admin dashboard
+
+--- src/components/AppLayout.jsx --- UPDATE sidebar stats ---
+
+Replace hardcoded "—" values with real API data:
+
+import { useQuery } from '@tanstack/react-query'
+import { adminAPI } from '../lib/api'
+
+Inside AppLayout sidebar:
+const { data: stats } = useQuery(
+  ['platform-stats'], 
+  adminAPI.getStats,
+  { 
+    staleTime: 5 * 60 * 1000, // cache 5 mins
+    retry: false, // don't retry if admin API returns 403 for non-admins
+    onError: () => {} // silently ignore — non-admin users get 403
+  }
+)
+
+Replace "—" with:
+  Active Jobs: stats?.open_jobs ?? '—'
+  Registered Farmers: stats?.farmers ?? '—'
+  Available Labour: stats?.labours ?? '—'
+
+Non-admin users: stats will be undefined (403 silently caught), shows "—"
+Admin users: shows real numbers
+
+--- src/pages/AdminDashboard.jsx --- FIX display issues ---
+
+Ensure all 4 tabs render correctly:
+
+Tab 1 Overview — fix stat cards:
+  Each card needs: icon (emoji, 32px) + number (32px bold) + label
+  Colors: farmers=green, labour=amber, jobs=blue, services=purple
+  Use: const { data: stats, isLoading } = useQuery(['admin-stats'], adminAPI.getStats)
+  Show skeleton while loading (4 gray pulse cards)
+
+Tab 2 Users — add search that works:
+  <input onChange={e => setSearch(e.target.value)} placeholder="Search by name or phone" />
+  Filter on frontend: users.filter(u => 
+    u.name.toLowerCase().includes(search) || u.phone.includes(search))
+  
+  Each user row (card style, not table — tables break on mobile):
+    Avatar circle (32px, role color, initial)
+    Name + role badge + village
+    Phone number (gray, small)
+    Active/Inactive badge
+    Two buttons: Toggle Active | Reset Password
+    Reset Password: inline — shows password input on click, "Set" button
+
+Tab 3 Jobs:
+  Each job card: title, farmer name, date, status badge, applications count
+  "Close" button calls adminAPI.closeJob(job.id)
+  Closed jobs show reason and remark
+
+Tab 4 Services:
+  Each service: name, provider, coverage, available status
+  View only for admin (providers manage their own)
+
+Admin logout: in profile page, admin also sees logout.
+Admin does NOT see regular dashboard — /admin is their only route.
+
+npm run build — 0 errors.
+Update TASKS.md and STATUS.md.

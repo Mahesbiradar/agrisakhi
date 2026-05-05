@@ -1,0 +1,95 @@
+Project: AgriSakhi
+Task: Farmer job management — CRUD, status, close with remarks
+
+--- BACKEND ---
+
+In jobs/views.py add JobCloseView:
+class JobCloseView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, pk):
+        try:
+            job = Job.objects.get(pk=pk, farmer=request.user)
+        except Job.DoesNotExist:
+            return Response({'error': 'Job not found'}, status=404)
+        
+        reason = request.data.get('reason', '')
+        remark = request.data.get('remark', '')
+        job.status = 'closed'
+        job.close_reason = reason
+        job.close_remark = remark
+        job.save()
+        return Response({'status': 'closed', 'message': 'Job closed successfully'})
+
+In jobs/models.py Job model add fields:
+  close_reason = CharField(max_length=50, blank=True, 
+    choices=['work_done','found_workers','postponed','other'])
+  close_remark = TextField(blank=True)
+
+Run migrations.
+
+Update JobDetailView to allow PUT for editing:
+  Only farmer who owns the job can edit.
+  Editable fields: title, description, wage_per_day, duration_days, 
+  workers_needed, work_type, status
+
+In jobs/urls.py add:
+  path('<uuid:pk>/close/', JobCloseView.as_view()),
+
+Add to src/lib/api.js jobsAPI:
+  closeJob: (id, data) => api.post(`/jobs/${id}/close/`, data),
+  updateJob: (id, data) => api.put(`/jobs/${id}/`, data),
+
+--- FRONTEND ---
+
+src/pages/JobListPage.jsx (Farmer's My Jobs) — FULL REWRITE:
+
+Header: "My Jobs" + count badge
+
+Status filter tabs: All | Open | Closed (pill tabs, green active)
+
+Each job card shows:
+  - Title + work type chip
+  - Status badge: green "Open" or gray "Closed"
+  - "X applied" badge in blue (application count)
+  - Date posted
+  - Wage + Duration
+  
+  Action buttons row (only for Open jobs):
+    "View Applications" button (outlined, shows count)
+    "Edit" button (outlined)  
+    "Close Job" button (red outlined)
+
+"Close Job" opens a BottomSheet with:
+  Heading: "Close this job?"
+  Reason (required) — 4 option chips:
+    ✅ Work Done | 👥 Found Workers | ⏸ Postponed | Other
+  Remark textarea (optional): "Add a note..."
+  Cancel button + "Close Job" red button
+  On confirm: call jobsAPI.closeJob(id, {reason, remark})
+  Show success toast, refresh list
+
+"Edit" opens a BottomSheet form with editable fields:
+  Title, Work Type, Wage, Duration, Workers Needed, Description
+  "Save Changes" button → jobsAPI.updateJob(id, data)
+  Show success toast, refresh list
+
+"View Applications" → navigate to /farmer/jobs/:id/applications
+
+Create src/pages/ApplicationsPage.jsx:
+Route: /farmer/jobs/:id/applications
+
+Shows list of labour who applied:
+  Each row: Labour name, village, phone
+  Status badge: Pending / Accepted / Rejected
+  Action buttons (if pending):
+    "Accept" green button → api call updateApplication(appId, {status:'accepted'})
+    "Reject" red outlined → updateApplication(appId, {status:'rejected'})
+  
+  Accepted labourers show:
+    📞 Call and 💬 WhatsApp buttons with their phone number
+  
+  Empty state: "No applications yet"
+
+Add route in App.jsx:
+  /farmer/jobs/:id/applications → <ApplicationsPage />

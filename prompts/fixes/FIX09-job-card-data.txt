@@ -1,0 +1,92 @@
+Project: AgriSakhi
+Task: Fix job card data rendering + farmer contact on job detail
+
+PROBLEM: Cards show empty km, ₹, date because field names don't match API response.
+API returns: wage_per_day, duration_days, created_at, distanceKm (added by backend)
+Cards render: wage, duration, posted, distance
+
+--- src/components/JobCard.jsx --- REWRITE ---
+
+Props: job object (from API), showDistance=true
+
+Field mapping — use these exact field names from API:
+  wage: job.wage_per_day
+  duration: job.duration_days (show as "X days")
+  posted: job.created_at (format with: new Date(job.created_at).toLocaleDateString('en-IN'))
+  distance: job.distanceKm ? `${job.distanceKm.toFixed(1)} km away` : ''
+  location: `${job.village || ''}, ${job.district || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, '')
+  workType: job.work_type (not workType)
+
+Card layout (full width, white, rounded-2xl, shadow-sm, p-4, mb-3):
+
+TOP ROW:
+  Left: work type chip (colored by type, use getRoleColor equivalent for work types)
+  Right: distance badge (green pill) — only if distanceKm exists
+
+TITLE: job.title in font-semibold text-gray-800 text-base, mt-2
+
+LOCATION ROW: 📍 icon + location string in text-sm text-gray-500
+
+DETAILS ROW (3 items inline):
+  💰 ₹{job.wage_per_day}/day  |  ⏱ {job.duration_days} days  |  👥 {job.workers_needed} workers
+
+DATE ROW: "Posted {formattedDate}" in text-xs text-gray-400
+
+BOTTOM ROW (only for labour view, prop showActions=true):
+  Left: 🔊 Listen button (amber, small) — only if job.audio_url exists
+  Right: "View & Apply →" green button
+
+Work type colors (create helper getWorkTypeColor(type)):
+  harvesting → bg-green-100 text-green-700
+  planting → bg-teal-100 text-teal-700
+  irrigation → bg-blue-100 text-blue-700
+  spraying → bg-purple-100 text-purple-700
+  land_prep → bg-orange-100 text-orange-700
+  other → bg-gray-100 text-gray-600
+
+--- src/pages/JobDetailPage.jsx --- UPDATE ---
+
+After the Apply button, add farmer contact section:
+
+<div className="bg-green-50 rounded-2xl p-4 mt-4">
+  <p className="text-sm font-medium text-green-800 mb-3">
+    📞 Contact Farmer Directly
+  </p>
+  <div className="flex gap-3">
+    <a href={`tel:+91${job.farmer_phone}`}
+       className="flex-1 bg-white border border-green-200 rounded-xl
+                  py-3 flex items-center justify-center gap-2
+                  text-green-700 font-medium text-sm">
+      📞 Call Farmer
+    </a>
+    <a href={`https://wa.me/91${job.farmer_phone}`}
+       target="_blank" rel="noopener noreferrer"
+       className="flex-1 bg-green-600 rounded-xl py-3
+                  flex items-center justify-center gap-2
+                  text-white font-medium text-sm">
+      💬 WhatsApp
+    </a>
+  </div>
+  <p className="text-xs text-gray-400 mt-2 text-center">
+    Tap to connect with {job.farmer_name}
+  </p>
+</div>
+
+In jobs/serializers.py JobSerializer:
+Add farmer_phone field:
+  farmer_phone = serializers.SerializerMethodField()
+  def get_farmer_phone(self, obj):
+      return obj.farmer.phone
+
+--- NEARBY QUERY FIX ---
+
+In backend jobs/views.py JobListCreateView GET:
+Make sure distanceKm is being added to each result.
+After Haversine filter, add to each job dict:
+  job_data['distanceKm'] = round(distance_value, 1)
+
+Also ensure lat/lng query params are read correctly:
+  lat = request.query_params.get('lat')
+  lng = request.query_params.get('lng')
+  If lat/lng are None or empty string, skip distance calculation
+  and return all open jobs sorted by created_at desc.
