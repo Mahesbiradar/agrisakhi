@@ -1,3 +1,5 @@
+import LanguageToggle from './LanguageToggle.jsx'
+
 const features = [
   { icon: '📍', text: 'Location-based matching' },
   { icon: '🎙️', text: 'Voice job descriptions' },
@@ -41,7 +43,10 @@ export default function AuthLayout({ children }) {
         <p className="text-green-300 text-xs">Free to use · Works on all phones · No subscription</p>
       </div>
 
-      <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-50 p-6 min-h-screen">
+      <div className="relative w-full lg:w-1/2 flex items-center justify-center bg-gray-50 p-6 min-h-screen">
+        <div className="absolute top-4 right-4 z-40">
+          <LanguageToggle />
+        </div>
         <div className="w-full max-w-md">
           {children}
         </div>

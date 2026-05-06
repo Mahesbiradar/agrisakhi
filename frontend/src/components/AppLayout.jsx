@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { adminAPI } from '../lib/api.js'
+import LanguageToggle from './LanguageToggle.jsx'
 
 export default function AppLayout({ children }) {
   const { data } = useQuery({
@@ -15,6 +16,9 @@ export default function AppLayout({ children }) {
       <div className="max-w-6xl mx-auto px-0 py-0 md:px-4 md:py-6 flex gap-6 justify-center">
 
         <div className="w-full sm:max-w-[520px] md:max-w-[480px] bg-white sm:rounded-2xl sm:shadow-lg min-h-screen sm:min-h-0 relative">
+          <div className="absolute top-3 right-3 z-40">
+            <LanguageToggle />
+          </div>
           {children}
         </div>
 

@@ -1,5 +1,4 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
-import LanguageToggle from './components/LanguageToggle.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import AddServicePage from './pages/AddServicePage.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
@@ -19,9 +18,6 @@ import RegisterPage from './pages/RegisterPage.jsx'
 function App() {
   return (
     <HashRouter>
-      <div className="fixed top-3 right-3 z-50">
-        <LanguageToggle />
-      </div>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
