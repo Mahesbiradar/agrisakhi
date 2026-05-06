@@ -1,7 +1,11 @@
-import { motion, useInView } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import LanguageToggle from '../components/LanguageToggle.jsx'
+import heroImg   from '../assets/landing/labour.jpg'
+import farmerImg from '../assets/landing/farmer.jpg'
+import labourImg from '../assets/landing/hero-field.jpg'
+import tractorImg from '../assets/landing/tractor.jpg'
 
 // ── SVG Icons ──────────────────────────────────────────────────────────
 const LeafIcon = ({ size = 24, color = 'currentColor' }) => (
@@ -40,117 +44,34 @@ const ChevronDownIcon = () => (
   </svg>
 )
 
-// ── Animated Counter ────────────────────────────────────────────────────
-function Counter({ target, suffix = '+' }) {
-  const [count, setCount] = useState(0)
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true })
-
-  useEffect(() => {
-    if (!inView) return
-    let start = 0
-    const duration = 1500
-    const step = target / (duration / 16)
-    const timer = setInterval(() => {
-      start += step
-      if (start >= target) { setCount(target); clearInterval(timer) }
-      else setCount(Math.floor(start))
-    }, 16)
-    return () => clearInterval(timer)
-  }, [inView, target])
-
-  return <span ref={ref}>{count}{suffix}</span>
-}
-
-// ── Phone Mockup ─────────────────────────────────────────────────────────
-function PhoneMockup({ content }) {
-  return (
-    <div style={{
-      width: 200, height: 360, background: '#111827',
-      borderRadius: 28, border: '4px solid #374151',
-      overflow: 'hidden', flexShrink: 0, position: 'relative',
-    }}>
-      <div style={{ height: 20, background: '#1f2937', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: 50, height: 4, background: '#374151', borderRadius: 4 }} />
-      </div>
-      {content}
-    </div>
-  )
-}
-
-const step1Screen = (
-  <div style={{ padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-    <div style={{ background: 'linear-gradient(135deg,#166534,#14532d)', borderRadius: 8, padding: '10px 12px' }}>
-      <div style={{ color: '#4ade80', fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>AGRISAKHI</div>
-      <div style={{ color: '#f0fdf4', fontSize: 12, fontWeight: 700, marginTop: 4 }}>Create Account</div>
-    </div>
-    {['Full Name', 'Phone Number', 'Password'].map(p => (
-      <div key={p} style={{ background: '#1f2937', borderRadius: 6, padding: '7px 10px', border: '1px solid #374151' }}>
-        <div style={{ color: '#6b7280', fontSize: 8 }}>{p}</div>
-        <div style={{ background: '#374151', height: 4, borderRadius: 2, marginTop: 4 }} />
-      </div>
-    ))}
-    <div style={{ background: '#4ade80', borderRadius: 8, padding: '8px 0', textAlign: 'center', color: '#052e16', fontSize: 10, fontWeight: 700, marginTop: 4 }}>
-      Get Started →
-    </div>
-  </div>
-)
-
-const step2Screen = (
-  <div style={{ padding: '10px 8px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-    <div style={{ color: '#f0fdf4', fontSize: 10, fontWeight: 700, marginBottom: 2 }}>Nearby Jobs</div>
-    {[['Harvesting', '5.2 km', '₹500/day'], ['Planting', '8.1 km', '₹450/day'], ['Spraying', '12 km', '₹600/day']].map(([t, d, w]) => (
-      <div key={t} style={{ background: '#1f2937', borderRadius: 8, padding: '8px 10px', border: '1px solid #374151' }}>
-        <div style={{ color: '#f0fdf4', fontSize: 9, fontWeight: 600 }}>{t}</div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 3 }}>
-          <span style={{ color: '#4ade80', fontSize: 8 }}>📍 {d}</span>
-          <span style={{ color: '#86efac', fontSize: 8, fontWeight: 600 }}>{w}</span>
-        </div>
-      </div>
-    ))}
-  </div>
-)
-
-const step3Screen = (
-  <div style={{ padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
-    <div style={{ color: '#f0fdf4', fontSize: 10, fontWeight: 700, textAlign: 'center' }}>Contact Farmer</div>
-    <div style={{ color: '#86efac', fontSize: 9, textAlign: 'center' }}>Raju Patil · Dharwad</div>
-    <div style={{ background: '#166534', borderRadius: 10, padding: '10px 0', width: '100%', textAlign: 'center', color: '#4ade80', fontSize: 9, fontWeight: 700 }}>
-      Call Farmer
-    </div>
-    <div style={{ borderRadius: 10, padding: '10px 0', width: '100%', textAlign: 'center', color: 'white', fontSize: 9, fontWeight: 700, background: '#25D366' }}>
-      WhatsApp
-    </div>
-  </div>
-)
-
 const steps = [
   {
-    num: '01', icon: <UserIcon size={22} color="#166534" />, iconBg: '#dcfce7',
+    iconBg: '#dcfce7',
+    icon: <UserIcon size={22} color="#166534" />,
     title: 'Create Your Profile',
     desc: 'Sign up in 2 minutes. Choose your role — Farmer, Labour, or Service Provider.',
-    kn: '2 ನಿಮಿಷದಲ್ಲಿ ನೋಂದಣಿ ಮಾಡಿ',
-    screen: step1Screen,
+    kannada: '2 ನಿಮಿಷದಲ್ಲಿ ನೋಂದಣಿ ಮಾಡಿ',
   },
   {
-    num: '02', icon: <LocationIcon size={22} color="#d97706" />, iconBg: '#fef3c7',
+    iconBg: '#fef3c7',
+    icon: <LocationIcon size={22} color="#d97706" />,
     title: 'Find Nearby Opportunities',
-    desc: 'We use your GPS location to show jobs, workers, and services within your area.',
-    kn: 'ಹತ್ತಿರದ ಅವಕಾಶಗಳನ್ನು ಹುಡುಕಿ',
-    screen: step2Screen,
+    desc: 'GPS-based matching shows jobs, workers, and services within your area.',
+    kannada: 'ಹತ್ತಿರದ ಅವಕಾಶಗಳನ್ನು ಹುಡುಕಿ',
   },
   {
-    num: '03', icon: <PhoneIcon size={22} color="#2563eb" />, iconBg: '#dbeafe',
+    iconBg: '#dbeafe',
+    icon: <PhoneIcon size={22} color="#2563eb" />,
     title: 'Connect Directly',
     desc: 'Call or WhatsApp directly — no middlemen, no fees, no delays.',
-    kn: 'ನೇರವಾಗಿ ಸಂಪರ್ಕಿಸಿ',
-    screen: step3Screen,
+    kannada: 'ನೇರವಾಗಿ ಸಂಪರ್ಕಿಸಿ',
   },
 ]
 
 const roleCards = [
   {
-    img: 'https://images.unsplash.com/photo-1589923188651-268a9765e432?w=600&q=80&auto=format',
+    img: farmerImg,
+    imgPosition: 'center center',
     role: 'farmer', label: 'Farmer', labelKn: 'ರೈತರು',
     pillBg: '#dcfce7', pillColor: '#166534',
     checkColor: '#16a34a', ctaBg: '#16a34a', ctaHover: '#15803d',
@@ -158,7 +79,8 @@ const roleCards = [
     cta: 'Join as Farmer',
   },
   {
-    img: 'https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?w=600&q=80&auto=format',
+    img: labourImg,
+    imgPosition: 'center 60%',
     role: 'labour', label: 'Labour', labelKn: 'ಕೂಲಿ ಕಾರ್ಮಿಕರು',
     pillBg: '#fef3c7', pillColor: '#b45309',
     checkColor: '#d97706', ctaBg: '#d97706', ctaHover: '#b45309',
@@ -166,19 +88,14 @@ const roleCards = [
     cta: 'Find Work',
   },
   {
-    img: 'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d4?w=600&q=80&auto=format',
+    img: tractorImg,
+    imgPosition: 'center center',
     role: 'provider', label: 'Service Provider', labelKn: 'ಸೇವಾ ಪೂರೈಕೆದಾರರು',
     pillBg: '#dbeafe', pillColor: '#1d4ed8',
     checkColor: '#2563eb', ctaBg: '#2563eb', ctaHover: '#1d4ed8',
     features: ['List your services', 'Set coverage area', 'Farmers find you', 'Manage enquiries'],
     cta: 'List Services',
   },
-]
-
-const avatars = [
-  { bg: '#166534', letter: 'M' }, { bg: '#15803d', letter: 'R' },
-  { bg: '#16a34a', letter: 'K' }, { bg: '#22c55e', letter: 'P' },
-  { bg: '#4ade80', letter: 'S' },
 ]
 
 export default function LandingPage() {
@@ -302,24 +219,24 @@ export default function LandingPage() {
                 </button>
               </motion.div>
 
+              {/* Trust badges */}
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 32, flexWrap: 'wrap' }}>
-                <span style={{ color: '#86efac', fontSize: 13 }}>
-                  Trusted by farmers across 10+ districts
-                </span>
-                <div style={{ display: 'flex' }}>
-                  {avatars.map((a, i) => (
-                    <div key={a.letter} style={{
-                      width: 32, height: 32, borderRadius: '50%', background: a.bg,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#f0fdf4', fontSize: 12, fontWeight: 700,
-                      marginLeft: i === 0 ? 0 : -8, border: '2px solid #0a1f0e',
-                    }}>{a.letter}</div>
-                  ))}
-                </div>
-                <span style={{ color: '#4ade80', fontSize: 13, fontWeight: 600 }}>500+ users</span>
+                style={{ display: 'flex', gap: 10, marginTop: 32, flexWrap: 'wrap' }}>
+                {[
+                  { text: 'Free to use', emoji: '✅' },
+                  { text: 'Karnataka districts', emoji: '📍' },
+                  { text: 'No middlemen', emoji: '🤝' },
+                ].map(b => (
+                  <span key={b.text} style={{
+                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)',
+                    color: '#86efac', fontSize: 12, padding: '6px 14px', borderRadius: 100,
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                  }}>
+                    {b.emoji} {b.text}
+                  </span>
+                ))}
               </motion.div>
             </div>
 
@@ -327,9 +244,11 @@ export default function LandingPage() {
             <div className="hidden lg:block">
               <div style={{ borderRadius: 20, overflow: 'hidden', position: 'relative', boxShadow: '0 40px 80px rgba(0,0,0,0.5)' }}>
                 <img
-                  src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=80&auto=format"
+                  src={heroImg}
                   alt="Karnataka farmland"
-                  style={{ width: '100%', height: 440, objectFit: 'cover', display: 'block' }}
+                  loading="eager"
+                  decoding="async"
+                  style={{ width: '100%', height: 440, objectFit: 'cover', objectPosition: 'center 40%', display: 'block' }}
                 />
                 <div style={{
                   position: 'absolute', bottom: 0, left: 0, right: 0, height: 200,
@@ -337,40 +256,29 @@ export default function LandingPage() {
                 }} />
                 <div style={{
                   position: 'absolute', bottom: 20, left: 20, right: 20,
-                  background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)',
+                  background: 'rgba(0,0,0,0.65)',
+                  backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
                   borderRadius: 14, padding: '16px 20px',
-                  border: '1px solid rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.12)',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{
                       width: 40, height: 40, background: '#166534', borderRadius: 10,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                     }}>
                       <LocationIcon size={20} color="white" />
                     </div>
                     <div>
-                      <p style={{ color: 'white', fontSize: 14, fontWeight: 600, margin: 0 }}>Live location matching</p>
-                      <p style={{ color: '#86efac', fontSize: 12, margin: 0 }}>Shows workers within 50km of your farm</p>
+                      <p style={{ color: 'white', fontSize: 13, fontWeight: 600, margin: 0 }}>Live location matching</p>
+                      <p style={{ color: '#86efac', fontSize: 11, margin: '2px 0 0 0' }}>Showing workers near your farm</p>
                     </div>
                     <div style={{
                       marginLeft: 'auto', background: '#4ade80',
                       borderRadius: 100, padding: '4px 10px',
-                      fontSize: 11, fontWeight: 700, color: '#052e16',
+                      fontSize: 11, fontWeight: 700, color: '#052e16', flexShrink: 0,
                     }}>LIVE</div>
                   </div>
                 </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-                {[['500+', 'Farmers'], ['1200+', 'Workers'], ['50+', 'Services']].map(([n, l]) => (
-                  <div key={l} style={{
-                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-                    padding: '10px 16px', borderRadius: 10, flex: 1, textAlign: 'center',
-                  }}>
-                    <div style={{ color: 'white', fontWeight: 700, fontSize: 20 }}>{n}</div>
-                    <div style={{ color: '#86efac', fontSize: 11, marginTop: 2 }}>{l}</div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
@@ -393,33 +301,23 @@ export default function LandingPage() {
             <p className="text-gray-500 mt-2">Simple enough for first-time smartphone users</p>
           </div>
 
-          <div className="space-y-20">
+          <div className="grid md:grid-cols-3 gap-8">
             {steps.map((s, i) => (
-              <motion.div key={s.num}
-                initial={{ opacity: 0, y: 24 }}
+              <motion.div key={i}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className={`flex flex-col ${i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12`}>
-
-                <div className="flex-1 space-y-4">
-                  <div style={{ color: '#16a34a', fontSize: 72, fontWeight: 900, lineHeight: 1, opacity: 0.15 }}>
-                    {s.num}
-                  </div>
-                  <div style={{
-                    width: 48, height: 48, background: s.iconBg, borderRadius: 12,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {s.icon}
-                  </div>
-                  <h3 className="text-2xl font-semibold text-gray-900">{s.title}</h3>
-                  <p className="text-gray-500 leading-relaxed text-base">{s.desc}</p>
-                  <p className="text-green-600 text-sm italic">{s.kn}</p>
+                transition={{ delay: i * 0.1 }}>
+                <div style={{
+                  width: 48, height: 48, background: s.iconBg, borderRadius: 12,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16,
+                }}>
+                  {s.icon}
                 </div>
-
-                <div className="flex-1 flex justify-center">
-                  <PhoneMockup content={s.screen} />
-                </div>
+                <div style={{ color: '#16a34a', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>0{i + 1}</div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111827', marginBottom: 8 }}>{s.title}</h3>
+                <p style={{ color: '#6b7280', fontSize: 14, lineHeight: 1.6 }}>{s.desc}</p>
+                <p style={{ color: '#16a34a', fontSize: 12, fontStyle: 'italic', marginTop: 6 }}>{s.kannada}</p>
               </motion.div>
             ))}
           </div>
@@ -444,7 +342,9 @@ export default function LandingPage() {
                 whileHover={{ y: -8 }}
                 className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 transition-shadow duration-300 hover:shadow-xl">
                 <img src={card.img} alt={card.label}
-                  style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
+                  loading="lazy"
+                  decoding="async"
+                  style={{ width: '100%', height: 200, objectFit: 'cover', objectPosition: card.imgPosition, display: 'block' }} />
                 <div style={{ padding: 24 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                     <span style={{ background: card.pillBg, color: card.pillColor, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 100 }}>
@@ -481,30 +381,28 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── STATS ── */}
-      <section className="py-16 px-4" style={{ background: '#111827' }}>
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="max-w-4xl mx-auto flex flex-wrap justify-center items-center">
+      {/* ── TRUST BAND ── */}
+      <section className="py-12 px-4" style={{ background: '#f0fdf4', borderTop: '1px solid #dcfce7', borderBottom: '1px solid #dcfce7' }}>
+        <div className="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
           {[
-            { target: 2000, label: 'Registered Users' },
-            { target: 500, label: 'Jobs Posted' },
-            { target: 50, label: 'Services Listed' },
-            { target: 10, label: 'Districts' },
-          ].map((s, i) => (
-            <div key={s.label} className="flex items-center">
-              <div className="text-center px-8 py-4">
-                <div style={{ fontSize: 48, fontWeight: 900, color: 'white', lineHeight: 1 }}>
-                  <Counter target={s.target} />
-                </div>
-                <p style={{ color: '#9ca3af', fontSize: 13, marginTop: 6 }}>{s.label}</p>
-              </div>
-              {i < 3 && <div className="hidden md:block w-px h-12 bg-gray-700" />}
+            { icon: '🌾', text: 'Built for farmers' },
+            { icon: '📍', text: 'Location-based matching' },
+            { icon: '🎙️', text: 'Voice job descriptions' },
+            { icon: '💬', text: 'Direct WhatsApp connect' },
+            { icon: '🌐', text: 'English & ಕನ್ನಡ support' },
+          ].map(p => (
+            <div key={p.text} style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              background: 'white', border: '1px solid #bbf7d0',
+              borderRadius: 100, padding: '8px 18px',
+              fontSize: 13, color: '#166534', fontWeight: 500,
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            }}>
+              <span>{p.icon}</span>
+              <span>{p.text}</span>
             </div>
           ))}
-        </motion.div>
+        </div>
       </section>
 
       {/* ── CTA ── */}
@@ -532,8 +430,8 @@ export default function LandingPage() {
             Login →
           </Link>
         </div>
-        <p style={{ color: '#166534', fontSize: 14, marginTop: 24 }}>
-          Free to use · No subscription · Works on all phones
+        <p style={{ color: '#4ade8066', fontSize: 13, marginTop: 24 }}>
+          Built for Karnataka's farming communities · Available in English and ಕನ್ನಡ
         </p>
       </section>
 

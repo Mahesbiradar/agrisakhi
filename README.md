@@ -1,135 +1,224 @@
 # AgriSakhi
 
-AgriSakhi is a mobile-first agriculture platform prototype built with React, Vite, and Tailwind CSS. It connects three user groups in one lightweight app:
+A full-stack agriculture platform for Karnataka that connects farmers, labourers, and service providers through location-based matching, voice job descriptions, and direct WhatsApp/call contact — available in English and ಕನ್ನಡ.
 
-- Farmers who want to post jobs and discover nearby labour and services
-- Labourers who want to find nearby work opportunities
-- Service providers who want to list machinery, spraying, seeds, testing, and other agricultural services
+## What It Does
 
-The app is designed around a 430px mobile shell and uses static mock data plus `localStorage` to simulate backend-driven flows.
-
-## What’s Included
-
-- Landing, login, and multi-step registration flow
-- Role-based dashboards for farmer, labour, and provider users
-- Protected routing with role-aware redirects
-- Farmer job posting flow and personal jobs list
-- Labour nearby jobs search and filtering
-- Provider service listing flow and provider service dashboard
-- Shared profile page for all roles
-- Shared reusable UI components for jobs, services, users, bottom sheets, and toast notifications
-- Netlify SPA deployment support
+- **Farmers** post job requirements with images and voice descriptions, browse nearby labour and agri services, and manage applications
+- **Labourers** find nearby jobs filtered by distance and wage, set daily availability, and contact farmers directly
+- **Service providers** list machinery, spraying, seeds, soil testing, and other services with a coverage radius
+- **Admins** view platform-wide stats and manage users
 
 ## Tech Stack
 
-- React 18
-- Vite
-- Tailwind CSS
-- React Router
-- Lucide React icons
-- `localStorage` for session and prototype persistence
+### Frontend
 
-## App Behavior
+| Library | Version | Purpose |
+|---|---|---|
+| React | 18 | UI framework |
+| Vite | 8 | Build tool |
+| Tailwind CSS | 3 | Styling |
+| React Router | 7 | Client-side routing (HashRouter) |
+| TanStack Query | 5 | Server state, caching, mutations |
+| Zustand | 5 | Auth store |
+| Axios | 1 | HTTP client |
+| framer-motion | 12 | Animations |
+| react-i18next | 17 | EN / ಕನ್ನಡ translations |
+| Lucide React | — | Icons |
 
-AgriSakhi is a frontend prototype, so data is handled locally:
+### Backend
 
-- Seed users, jobs, and services are loaded from files under [`src/data`](d:\Projects\agrisakhi\agrisakhi\src\data)
-- Logged-in user session is stored in `localStorage`
-- Newly registered users are persisted to `localStorage`
-- New jobs and services created in the UI are also persisted to `localStorage`
-
-This means the app behaves like a small offline demo backend without requiring any server setup.
-
-## Main Routes
-
-Public routes:
-
-- `/`
-- `/login`
-- `/register`
-
-Protected routes:
-
-- `/farmer`
-- `/farmer/post-job`
-- `/farmer/jobs`
-- `/labour`
-- `/provider`
-- `/provider/add-service`
-- `/profile`
-
-## Demo Login Notes
-
-Mock users are preloaded from [`users.js`](d:\Projects\agrisakhi\agrisakhi\src\data\users.js).
-
-- Registered users use the exact password they created
-- Seed mock users do not have stored passwords in the mock dataset, so the current prototype accepts any non-empty password for them
-
-If you want strict password validation for seed accounts later, that can be added easily.
-
-## Getting Started
-
-1. Install dependencies:
-
-```bash
-npm install
-```
-
-2. Start the development server:
-
-```bash
-npm run dev
-```
-
-3. Build for production:
-
-```bash
-npm run build
-```
-
-4. Preview the production build:
-
-```bash
-npm run preview
-```
+| Library | Purpose |
+|---|---|
+| Django 4.2 | Web framework |
+| Django REST Framework | API layer |
+| djangorestframework-simplejwt | JWT authentication |
+| PostgreSQL | Database |
+| Cloudinary | Media storage (optional) |
+| django-cors-headers | CORS |
+| django-filter | Query filtering |
+| gunicorn | Production server |
 
 ## Project Structure
 
-```text
-src/
-  components/   Shared UI pieces
-  context/      Auth and app data context
-  data/         Mock users, jobs, and services
-  pages/        Route-level screens
-  utils/        Helpers, colors, location logic, toast hook
-public/
-  _redirects    Netlify SPA fallback
 ```
+agrisakhi/
+├── agrisakhi_backend/          Django project
+│   ├── users/                  Custom user model, auth, profile
+│   ├── jobs/                   Job listings, applications
+│   ├── services/               Service listings with coverage area
+│   └── agrisakhi_backend/      Django settings, URLs, WSGI
+│
+├── frontend/                   Vite + React project
+│   └── src/
+│       ├── assets/landing/     Local landing page images
+│       ├── components/         Shared UI (AppLayout, AuthLayout, JobCard, BottomSheet…)
+│       ├── lib/                API client (api.js), i18n config
+│       ├── locales/            en.json, kn.json translation strings
+│       ├── pages/              Route-level screens
+│       ├── store/              Zustand authStore
+│       └── utils/              Location helpers, audio, Cloudinary, toast hook
+│
+├── netlify.toml                Netlify build config (frontend)
+└── README.md
+```
+
+## Routes
+
+**Public**
+
+| Path | Page |
+|---|---|
+| `/` | Landing page |
+| `/login` | Login |
+| `/register` | Multi-step registration |
+| `/forgot-password` | Password reset |
+
+**Protected — Farmer**
+
+| Path | Page |
+|---|---|
+| `/farmer` | Farmer dashboard — nearby labour and services |
+| `/farmer/post-job` | Post a new job with image + voice |
+| `/farmer/jobs` | My posted jobs |
+| `/farmer/jobs/:id/applications` | Applications for a job |
+
+**Protected — Labour**
+
+| Path | Page |
+|---|---|
+| `/labour` | Labour dashboard — nearby jobs, availability toggle |
+
+**Protected — Service Provider**
+
+| Path | Page |
+|---|---|
+| `/provider` | Provider dashboard — my services, availability |
+| `/provider/add-service` | Add a new service listing |
+
+**Protected — All Roles**
+
+| Path | Page |
+|---|---|
+| `/profile` | Profile — edit details, change password |
+| `/jobs/:id` | Job detail — audio, contact buttons |
+
+**Protected — Admin**
+
+| Path | Page |
+|---|---|
+| `/admin` | Admin dashboard — platform stats and user list |
+
+## Getting Started
+
+### Backend
+
+**Requirements:** Python 3.11+, PostgreSQL
+
+```bash
+cd agrisakhi_backend
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+Copy the example env file and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+```env
+SECRET_KEY=your-secret-key
+DEBUG=True
+DB_NAME=agrisakhi
+DB_USER=postgres
+DB_PASSWORD=yourpassword
+DB_HOST=localhost
+DB_PORT=5432
+CORS_ORIGINS=http://localhost:5173
+
+# Optional — leave blank to use local filesystem storage
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+Run migrations and start the server:
+
+```bash
+python manage.py migrate
+python manage.py createsuperuser   # optional admin account
+python manage.py runserver
+```
+
+API is served at `http://localhost:8000/api/`.
+
+### Frontend
+
+**Requirements:** Node 20+
+
+```bash
+cd frontend
+npm install
+```
+
+Create a `.env` file:
+
+```env
+VITE_API_URL=http://localhost:8000/api
+
+# Optional Cloudinary direct upload
+VITE_CLOUDINARY_CLOUD_NAME=
+VITE_CLOUDINARY_UPLOAD_PRESET=
+```
+
+```bash
+npm run dev       # development server at http://localhost:5173
+npm run build     # production build → dist/
+npm run preview   # preview the production build
+```
+
+## Key Features
+
+**Authentication**
+- Phone number is the login credential — no email required
+- JWT access tokens (15 min) + refresh tokens (7 days, rotated on use)
+- Role-based protected routes: farmer, labour, provider, admin
+
+**Location matching**
+- GPS coordinates captured on registration
+- Haversine distance calculation on the backend
+- Labour and services sorted by distance from the requesting farmer's location
+
+**Voice job descriptions**
+- Farmers can record audio when posting a job
+- Audio playback on job detail and job cards
+
+**Image uploads**
+- Job images uploaded via Cloudinary (or local filesystem in dev)
+- Role card images served from local `assets/landing/`
+
+**Language toggle**
+- EN / ಕನ್ನಡ switch available on all pages via react-i18next
+
+**Admin dashboard**
+- Live platform stats (total farmers, labourers, open jobs, services)
+- User list with role and join date
 
 ## Deployment
 
-This repo is prepared for Netlify:
+**Backend — Railway**
 
-- [`public/_redirects`](d:\Projects\agrisakhi\agrisakhi\public\_redirects) handles SPA route fallback
-- [`netlify.toml`](d:\Projects\agrisakhi\agrisakhi\netlify.toml) configures build output
+The `agrisakhi_backend/railway.json` and `Procfile` configure Railway deployment. Set all env vars from `.env.example` in the Railway dashboard. The database should be a Railway-managed PostgreSQL instance.
 
-Build settings:
+**Frontend — Netlify**
 
-- Command: `npm run build`
-- Publish directory: `dist`
+`netlify.toml` at the project root points to `frontend/` as the base with `npm run build` and `dist` as the publish directory. `public/_redirects` handles SPA fallback routing.
 
-## Design Notes
+## Development Notes
 
-- Mobile-first layout with a centered 430px app shell
-- Kannada-capable typography using Noto Sans Kannada
-- Role-based color system for farmer, labour, and provider flows
-- Touch-friendly controls sized for mobile interaction
-
-## Future Improvements
-
-- Real backend and authentication
-- True profile editing
-- Service editing and availability management
-- Better analytics and job/service status tracking
-- Kannada/English content localization beyond the prototype toggle
-
+- The backend uses a custom `User` model (`AUTH_USER_MODEL = 'users.User'`) with `phone` as the `USERNAME_FIELD`
+- Cloudinary storage is activated only when all three Cloudinary env vars are set; otherwise Django falls back to `FileSystemStorage` under `media/`
+- The frontend uses `HashRouter` so deep links work on static hosts without server-side rewrite rules
+- TanStack Query cache keys follow the pattern `['resource-name', id?]` — invalidation is scoped per mutation
