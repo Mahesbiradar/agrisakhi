@@ -130,19 +130,30 @@ export default function LabourDashboard() {
         </div>
       </section>
 
-      <div className={`flex items-center justify-between rounded-2xl border px-4 py-3 ${isReady ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'}`}>
-        <div>
-          <p className={`text-sm font-semibold ${isReady ? 'text-green-700' : 'text-gray-600'}`}>
-            {isReady ? '✅ Ready for Work Today' : '⭕ Not Available Today'}
-          </p>
-          <p className="text-xs text-gray-400 mt-0.5">
-            {isReady ? 'Farmers can see you are available' : 'Turn on to receive job opportunities'}
-          </p>
+      <div className={`rounded-2xl p-4 border-2 transition-all ${isReady ? 'bg-green-50 border-green-400' : 'bg-gray-50 border-gray-200'}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl ${isReady ? 'bg-green-100' : 'bg-gray-100'}`}>
+              {isReady ? '✅' : '⭕'}
+            </div>
+            <div>
+              <p className={`font-semibold text-sm ${isReady ? 'text-green-800' : 'text-gray-700'}`}>
+                {isReady ? 'Available for Work Today' : 'Not Available Today'}
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {isReady ? 'Farmers can see you · Resets at midnight' : 'Turn on to get job opportunities'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleReadyToggle}
+            role="switch"
+            aria-checked={isReady}
+            className={`relative inline-flex items-center w-16 h-8 rounded-full transition-colors duration-300 focus:outline-none ${isReady ? 'bg-green-500' : 'bg-gray-300'}`}>
+            <span className={`inline-block w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${isReady ? 'translate-x-9' : 'translate-x-1'}`} />
+          </button>
         </div>
-        <button type="button" onClick={handleReadyToggle}
-          className={`relative w-14 h-7 rounded-full transition-colors duration-200 ${isReady ? 'bg-green-500' : 'bg-gray-300'}`}>
-          <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform duration-200 ${isReady ? 'translate-x-7' : 'translate-x-0.5'}`} />
-        </button>
       </div>
 
       <section className="grid grid-cols-2 gap-3">

@@ -1,4 +1,3 @@
-import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 function getWorkTypeColor(type) {
@@ -13,21 +12,21 @@ function getWorkTypeColor(type) {
 }
 
 function AudioButton({ audioUrl }) {
-  const audioRef = useRef(null)
-  const [playing, setPlaying] = useState(false)
-  const toggle = () => {
-    if (!audioRef.current) return
-    if (playing) { audioRef.current.pause(); setPlaying(false) }
-    else { audioRef.current.play(); setPlaying(true) }
-  }
   return (
-    <>
-      <audio ref={audioRef} src={audioUrl} onEnded={() => setPlaying(false)} className="hidden" />
-      <button type="button" onClick={toggle}
-        className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-        {playing ? '⏸' : '🔊'} Listen
-      </button>
-    </>
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation()
+        const audio = new Audio(audioUrl)
+        audio.play()
+      }}
+      className="flex items-center gap-2 bg-amber-50 border border-amber-300 text-amber-700 rounded-xl px-3 py-2 text-sm font-medium hover:bg-amber-100 transition-colors">
+      <span className="relative flex h-3 w-3">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+        <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500" />
+      </span>
+      🔊 Listen to Job
+    </button>
   )
 }
 
@@ -58,6 +57,17 @@ export default function JobCard({ job, showDistance = false, showActions = false
 
       <h2 className="mt-2 text-base font-semibold text-gray-800">{job.title}</h2>
 
+      {job.image_url && (
+        <div className="mt-3 mb-2 rounded-xl overflow-hidden h-36 w-full">
+          <img
+            src={job.image_url}
+            alt={job.title}
+            className="w-full h-full object-cover"
+            onError={(e) => { e.target.style.display = 'none' }}
+          />
+        </div>
+      )}
+
       {location && (
         <div className="mt-1 flex items-center gap-1 text-sm text-gray-500">
           <span>📍</span>
@@ -76,7 +86,7 @@ export default function JobCard({ job, showDistance = false, showActions = false
       )}
 
       {showActions && (
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-3 flex items-center justify-between gap-2">
           {job.audio_url ? <AudioButton audioUrl={job.audio_url} /> : <span />}
           <Link to={`/jobs/${job.id}`}
             className="ml-auto inline-flex items-center gap-1 rounded-2xl bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-amber-500 transition">

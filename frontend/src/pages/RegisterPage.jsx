@@ -1,16 +1,17 @@
-import { ArrowLeft, Leaf, Loader2, MapPin, Truck, UserRound, Users } from 'lucide-react'
-import PhoneInput from '../components/PhoneInput.jsx'
+import { Eye, EyeOff, Loader2, MapPin } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import AuthLayout from '../components/AuthLayout.jsx'
+import PhoneInput from '../components/PhoneInput.jsx'
 import { authAPI } from '../lib/api.js'
 import useAuthStore from '../store/authStore.js'
 import { getDashboardPath } from '../utils/auth.js'
 
 const roleOptions = [
-  { value: 'farmer', label: 'Farmer', icon: UserRound, description: 'Hire workers and manage farm needs' },
-  { value: 'labour', label: 'Labour', icon: Users, description: 'Find nearby daily work quickly' },
-  { value: 'provider', label: 'Service Provider', icon: Truck, description: 'List machinery, seeds, and agri services' },
+  { value: 'farmer', label: 'Farmer', emoji: '🌾', locationText: 'labourers and services' },
+  { value: 'labour', label: 'Labour', emoji: '👷', locationText: 'job postings' },
+  { value: 'provider', label: 'Service Provider', emoji: '🚜', locationText: 'farmers looking for services' },
 ]
 
 export default function RegisterPage() {
@@ -18,15 +19,15 @@ export default function RegisterPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { setAuth } = useAuthStore()
+
   const requestedRole = searchParams.get('role')
-  const initialRole = roleOptions.some((o) => o.value === requestedRole) ? requestedRole : 'farmer'
+  const initialRole = roleOptions.find((o) => o.value === requestedRole)?.value ?? 'farmer'
 
   const [step, setStep] = useState(1)
-  const [formData, setFormData] = useState({
-    name: '', phone: '', password: '', role: initialRole,
-    village: '', district: '', lat: null, lng: null,
-  })
+  const [formData, setFormData] = useState({ name: '', phone: '', password: '', role: initialRole })
+  const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [locating, setLocating] = useState(false)
   const [error, setError] = useState('')
 
   const update = (field, value) => setFormData((f) => ({ ...f, [field]: value }))
@@ -43,10 +44,12 @@ export default function RegisterPage() {
     } catch (err) {
       setError(err.userMessage || t('phoneRegistered'))
       setSubmitting(false)
+      setLocating(false)
     }
   }
 
   const handleAllowLocation = () => {
+    setLocating(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => doRegister(pos.coords.latitude, pos.coords.longitude),
       () => doRegister(null, null),
@@ -55,111 +58,132 @@ export default function RegisterPage() {
 
   const handleSkipLocation = () => doRegister(null, null)
 
+  const selectedRole = roleOptions.find((o) => o.value === formData.role)
+
   return (
-    <div className="page-container bg-gradient-to-b from-green-50 via-white to-white">
-      <div className="px-5 pb-8 pt-6">
-        <div className="flex items-center justify-between">
-          <button type="button" onClick={() => (step === 1 ? navigate(-1) : setStep(1))}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm">
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div className="flex items-center gap-2 rounded-full bg-green-100 px-3 py-2 text-xs font-semibold text-green-700">
-            <Leaf className="h-4 w-4" />
-            Step {step} of 2
-          </div>
-        </div>
+    <AuthLayout>
+      <div className="flex items-center gap-2 mb-4 lg:hidden">
+        <span className="text-2xl">🌿</span>
+        <span className="font-bold text-green-800 text-lg">AgriSakhi</span>
+      </div>
 
-        <div className="mt-8">
-          <h1 className="text-3xl font-black text-slate-900">Create your account</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            Join AgriSakhi and connect with nearby people, work, and farm services.
-          </p>
-        </div>
+      {step === 1 ? (
+        <>
+          <h1 className="text-2xl font-black text-slate-900">Create Your Account</h1>
+          <p className="mt-1 text-sm text-slate-500">Join thousands of farmers across Karnataka</p>
 
-        <div className="mt-6 h-2 rounded-full bg-slate-100">
-          <div className={`h-2 rounded-full bg-green-600 transition-all duration-300 ${step === 1 ? 'w-1/2' : 'w-full'}`} />
-        </div>
-
-        {step === 1 ? (
-          <form onSubmit={handleNext} className="mt-8 space-y-5">
+          <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-3 mt-4 mb-5">
+            <span className="text-3xl">{selectedRole?.emoji}</span>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="name">{t('name')}</label>
+              <p className="font-semibold text-green-800">{selectedRole?.label}</p>
+              <button type="button" onClick={() => navigate(-1)}
+                className="text-xs text-green-600 underline">
+                Change role
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 mb-5">
+            <div className="flex-1 h-1.5 rounded-full bg-green-500" />
+            <div className="flex-1 h-1.5 rounded-full bg-slate-200" />
+            <span className="text-xs text-slate-500 ml-1">Step 1 of 2</span>
+          </div>
+
+          <form onSubmit={handleNext} className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700" htmlFor="name">
+                👤 {t('name')}
+              </label>
               <input id="name" type="text" value={formData.name}
                 onChange={(e) => update('name', e.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-green-500"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-4 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-green-500"
                 placeholder="Enter your full name" required />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="phone">{t('phone')}</label>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700" htmlFor="phone">
+                📱 {t('phone')}
+              </label>
               <PhoneInput id="phone" value={formData.phone} onChange={(v) => update('phone', v)} required />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="password">{t('password')}</label>
-              <input id="password" type="password" value={formData.password}
-                onChange={(e) => update('password', e.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-green-500"
-                placeholder="Create a password" required />
-            </div>
-            <div>
-              <p className="mb-3 text-sm font-semibold text-slate-700">{t('role')}</p>
-              <div className="space-y-3">
-                {roleOptions.map((option) => {
-                  const Icon = option.icon
-                  const isActive = formData.role === option.value
-                  return (
-                    <button key={option.value} type="button" onClick={() => update('role', option.value)}
-                      className={`flex w-full items-center gap-4 rounded-3xl border px-4 py-4 text-left transition ${isActive ? 'border-green-600 bg-green-50 shadow-lg shadow-green-100' : 'border-slate-200 bg-white'}`}>
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${isActive ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900">{option.label}</p>
-                        <p className="mt-1 text-sm text-slate-500">{option.description}</p>
-                      </div>
-                    </button>
-                  )
-                })}
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700" htmlFor="password">
+                🔒 {t('password')}
+              </label>
+              <div className="relative">
+                <input id="password" type={showPassword ? 'text' : 'password'} value={formData.password}
+                  onChange={(e) => update('password', e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-4 pr-12 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-green-500"
+                  placeholder="Create a password" required />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
             </div>
-            <button type="submit" className="w-full rounded-2xl bg-green-600 px-4 py-4 text-base font-semibold text-white shadow-lg shadow-green-100 transition hover:bg-green-700">
-              {t('next')}
+            <button type="submit"
+              className="w-full rounded-xl bg-green-600 px-4 py-4 text-base font-semibold text-white shadow-lg shadow-green-100 transition hover:bg-green-700">
+              Next →
             </button>
           </form>
-        ) : (
-          <div className="mt-8 space-y-5">
-            <div className="flex flex-col items-center text-center">
-              <div className="text-8xl leading-none">📍</div>
-              <h2 className="mt-5 text-2xl font-black text-slate-900">Allow Location Access</h2>
-              <p className="mt-3 text-sm leading-6 text-slate-600">
-                AgriSakhi uses your location to show nearby jobs and workers
-              </p>
-              <p className="mt-1 text-sm text-slate-500">
-                ಹತ್ತಿರದ ಕೆಲಸಗಳನ್ನು ತೋರಿಸಲು ನಿಮ್ಮ ಸ್ಥಳ ಬೇಕಾಗುತ್ತದೆ
-              </p>
-            </div>
 
-            {error && (
-              <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">{error}</p>
-            )}
+          <p className="mt-5 text-center text-sm text-slate-600">
+            {t('alreadyHaveAccount')}{' '}
+            <Link to="/login" className="font-semibold text-green-700">{t('login')}</Link>
+          </p>
+        </>
+      ) : (
+        <>
+          <h1 className="text-2xl font-black text-slate-900">Almost done! 🎉</h1>
+          <p className="mt-1 text-sm text-slate-500">Allow location to find opportunities near you</p>
 
-            <button type="button" onClick={handleAllowLocation} disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 py-4 text-base font-semibold text-white shadow-lg shadow-green-100 transition hover:bg-green-700 disabled:opacity-60">
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
-              Allow Location &amp; Create Account
-            </button>
-
-            <button type="button" onClick={handleSkipLocation} disabled={submitting}
-              className="w-full text-center text-sm text-slate-500 underline disabled:opacity-60">
-              Skip location for now
-            </button>
+          <div className="flex items-center gap-2 my-5">
+            <div className="flex-1 h-1.5 rounded-full bg-green-500" />
+            <div className="flex-1 h-1.5 rounded-full bg-green-500" />
+            <span className="text-xs text-slate-500 ml-1">Step 2 of 2</span>
           </div>
-        )}
 
-        <p className="mt-6 text-center text-sm text-slate-600">
-          {t('alreadyHaveAccount')}{' '}
-          <Link to="/login" className="font-semibold text-green-700">{t('login')}</Link>
-        </p>
-      </div>
-    </div>
+          <div className="text-center bg-green-50 border-2 border-dashed border-green-300 rounded-2xl p-8 mb-5">
+            <div className="text-6xl mb-4">📍</div>
+            <h3 className="font-bold text-green-800 text-lg">Enable Location</h3>
+            <p className="text-gray-600 text-sm mt-2">
+              We use GPS to show you nearby {selectedRole?.locationText}.
+              Your location is never shared publicly.
+            </p>
+            <p className="text-green-600 text-sm mt-1">
+              ಹತ್ತಿರದ ಅವಕಾಶಗಳಿಗಾಗಿ ಸ್ಥಳ ಅನುಮತಿ ಕೊಡಿ
+            </p>
+          </div>
+
+          {error && (
+            <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">{error}</p>
+          )}
+
+          <button type="button" onClick={handleAllowLocation} disabled={submitting}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-4 text-base font-semibold text-white shadow-lg shadow-green-100 transition hover:bg-green-700 disabled:opacity-60">
+            {locating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Getting your location... 📡
+              </>
+            ) : (
+              <>
+                <MapPin className="h-4 w-4" />
+                Allow Location &amp; Create Account 📍
+              </>
+            )}
+          </button>
+
+          <button type="button" onClick={handleSkipLocation} disabled={submitting}
+            className="mt-3 w-full text-center text-sm text-slate-500 hover:text-slate-700 underline disabled:opacity-60">
+            Skip &amp; Continue without location
+          </button>
+
+          <button type="button" onClick={() => setStep(1)}
+            className="mt-4 w-full text-center text-xs text-slate-400 hover:text-slate-600">
+            ← Back to details
+          </button>
+        </>
+      )}
+    </AuthLayout>
   )
 }

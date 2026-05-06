@@ -1,9 +1,10 @@
-import { BriefcaseBusiness, CirclePlus, MapPin, RefreshCw, Tractor, Users } from 'lucide-react'
+import { BriefcaseBusiness, CirclePlus, MapPin, Tractor, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import BottomSheet from '../components/BottomSheet.jsx'
 import PageSkeleton from '../components/PageSkeleton.jsx'
-import ServiceCard from '../components/ServiceCard.jsx'
 import UserCard from '../components/UserCard.jsx'
 import useAuthStore from '../store/authStore.js'
 import { usersAPI, servicesAPI } from '../lib/api.js'
@@ -58,6 +59,8 @@ export default function FarmerDashboard() {
 
   const nearbyLabour = labourRes?.data || []
   const nearbyServices = servicesRes?.data || []
+
+  const [selectedService, setSelectedService] = useState(null)
 
   if (!user) return <PageSkeleton variant="dashboard" />
 
@@ -164,7 +167,37 @@ export default function FarmerDashboard() {
         ) : nearbyServices.length > 0 ? (
           <div className="mt-4 space-y-3">
             {nearbyServices.map((service) => (
-              <ServiceCard key={service.id} service={service} showDistance />
+              <div key={service.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                {service.image_url && (
+                  <img src={service.image_url} alt={service.service_name}
+                    className="w-full h-32 object-cover"
+                    onError={(e) => { e.target.style.display = 'none' }} />
+                )}
+                <div className="p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-medium capitalize">
+                      {service.category}
+                    </span>
+                    {service.distanceKm != null && (
+                      <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                        📍 {Number(service.distanceKm).toFixed(1)} km
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-semibold text-gray-800">{service.service_name}</h3>
+                  {service.description && (
+                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{service.description}</p>
+                  )}
+                  <div className="flex items-center justify-between mt-3">
+                    <span className="text-green-700 font-bold text-sm">₹ {service.price_info}</span>
+                    <button type="button"
+                      onClick={() => setSelectedService(service)}
+                      className="text-sm bg-blue-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-blue-700">
+                      View Details →
+                    </button>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         ) : (
@@ -174,6 +207,59 @@ export default function FarmerDashboard() {
           </div>
         )}
       </section>
+
+      <BottomSheet isOpen={!!selectedService} onClose={() => setSelectedService(null)} title={selectedService?.service_name ?? ''}>
+        {selectedService && (
+          <div className="space-y-4">
+            {selectedService.image_url && (
+              <img src={selectedService.image_url} alt={selectedService.service_name}
+                className="w-full h-48 object-cover rounded-2xl"
+                onError={(e) => { e.target.style.display = 'none' }} />
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-medium capitalize">
+                {selectedService.category}
+              </span>
+              {selectedService.distanceKm != null && (
+                <span className="text-xs text-green-700 font-medium">
+                  📍 {Number(selectedService.distanceKm).toFixed(1)} km away
+                </span>
+              )}
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Provider</p>
+              <p className="font-semibold text-slate-900">{selectedService.provider_name}</p>
+            </div>
+            {selectedService.description && (
+              <p className="text-sm text-slate-600 leading-6">{selectedService.description}</p>
+            )}
+            <div className="flex gap-6">
+              <div>
+                <p className="text-xs text-slate-500">Price</p>
+                <p className="font-bold text-green-700">₹ {selectedService.price_info}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500">Coverage</p>
+                <p className="font-semibold text-slate-900">{selectedService.coverage_km} km radius</p>
+              </div>
+            </div>
+            {selectedService.provider_phone && (
+              <div className="flex gap-3 pt-2">
+                <a href={`tel:+91${selectedService.provider_phone}`}
+                  className="flex-1 bg-white border-2 border-green-500 rounded-xl py-3 flex items-center justify-center gap-2 text-green-700 font-semibold text-sm hover:bg-green-50 transition">
+                  📞 Call Provider
+                </a>
+                <a href={`https://wa.me/91${selectedService.provider_phone}?text=${encodeURIComponent(`Hi, I found your service "${selectedService.service_name}" on AgriSakhi`)}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex-1 rounded-xl py-3 flex items-center justify-center gap-2 text-white font-semibold text-sm"
+                  style={{ background: '#25D366' }}>
+                  💬 WhatsApp
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+      </BottomSheet>
     </div>
   )
 }

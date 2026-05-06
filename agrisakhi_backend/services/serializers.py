@@ -4,14 +4,15 @@ from .models import ServiceListing, Rating
 
 class ServiceListingSerializer(serializers.ModelSerializer):
     provider_name = serializers.SerializerMethodField()
-    distance = serializers.SerializerMethodField()
+    provider_phone = serializers.SerializerMethodField()
+    distanceKm = serializers.SerializerMethodField()
 
     class Meta:
         model = ServiceListing
         fields = [
-            'id', 'provider', 'provider_name', 'service_name', 'category',
+            'id', 'provider', 'provider_name', 'provider_phone', 'service_name', 'category',
             'description', 'image_url', 'price_info', 'village', 'district',
-            'lat', 'lng', 'coverage_km', 'is_available', 'created_at', 'distance',
+            'lat', 'lng', 'coverage_km', 'is_available', 'created_at', 'distanceKm',
         ]
         read_only_fields = ['id', 'provider', 'created_at']
         extra_kwargs = {
@@ -24,7 +25,10 @@ class ServiceListingSerializer(serializers.ModelSerializer):
     def get_provider_name(self, obj):
         return obj.provider.name
 
-    def get_distance(self, obj):
+    def get_provider_phone(self, obj):
+        return obj.provider.phone
+
+    def get_distanceKm(self, obj):
         return getattr(obj, 'distance', None)
 
 

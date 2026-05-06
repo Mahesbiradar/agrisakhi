@@ -1,0 +1,183 @@
+Project: AgriSakhi
+Task: Complete landing page redesign — full screen, all devices, animated, professional
+
+src/pages/LandingPage.jsx — FULL REWRITE
+
+This is a full-screen marketing landing page. NO max-width container.
+Width: 100vw. Remove AppLayout wrapper entirely for this page.
+
+Install if not present: npm install framer-motion
+
+--- OVERALL STRUCTURE ---
+
+<div className="min-h-screen w-full overflow-x-hidden">
+  Section 1: Hero (full screen, gradient bg)
+  Section 2: How it works (white bg, 3 steps)  
+  Section 3: Role cards (light green bg)
+  Section 4: Stats bar (dark green bg)
+  Section 5: CTA footer (gradient bg)
+</div>
+
+--- SECTION 1: HERO (100vh, full width) ---
+
+Background: linear-gradient from #1a4731 via #2d6a4f to #52b788
+(deep forest green — professional, agricultural)
+
+Layout on desktop: two columns (left: text, right: illustration)
+Layout on mobile: single column, centered
+
+LEFT COLUMN (text):
+  TOP NAV BAR (fixed, transparent → solid on scroll):
+    Left: 🌿 AgriSakhi logo + "KARNATAKA RURAL NETWORK" tiny caps
+    Right: Language toggle (EN | ಕನ್ನಡ) + "Login" outlined white button
+
+  HERO TEXT (fade in from bottom, 0.5s delay):
+    Eyebrow: "FARM TO FIELD SUPPORT" in #74c69d small caps letter-spacing-widest
+    H1 (large, white, bold):
+      "Connecting Karnataka's"
+      "Farmers, Labour &"
+      "Services" (this word in #74c69d)
+    Subtext (white/70):
+      "Find nearby workers, post farming jobs, and discover
+       agricultural services — all in one place."
+    Kannada subtext: "ರೈತರ ಮತ್ತು ಕೂಲಿಕಾರರ ಸೇತು"
+
+  ROLE BUTTONS ROW (slide in from left, 0.8s delay):
+    Three buttons side by side:
+    🌾 "I'm a Farmer" → /register?role=farmer
+      (green bg, white text, rounded-xl, py-3 px-5)
+    👷 "Find Work" → /register?role=labour
+      (white bg, green text, rounded-xl, py-3 px-5)
+    🚜 "My Services" → /register?role=provider
+      (outlined white, rounded-xl, py-3 px-5)
+    
+    Below buttons: "Already registered? 
+    <span onClick→/login className='underline text-green-300'>Sign in →</span>"
+
+RIGHT COLUMN (illustration — desktop only, hidden on mobile):
+  An animated SVG illustration showing:
+  - A green field background (simple curved path)
+  - Farmer figure (simple SVG stick figure with hat, green/brown)
+  - Labour figures (2-3 smaller figures working)
+  - A tractor SVG (simple, amber colored)
+  - Animated: figures gently bob up and down (CSS keyframe, 3s ease infinite)
+  - Animated: tractor moves left-right slowly (10s linear infinite alternate)
+  - Keep illustration simple — geometric shapes, not detailed art
+
+  Below illustration: 3 floating stat chips (white cards, subtle shadow):
+    "500+ Farmers" | "1200+ Workers" | "50+ Services"
+    (these are aspirational numbers for marketing)
+
+SCROLL INDICATOR at bottom center:
+  Animated bouncing arrow ↓ in white/50
+
+--- SECTION 2: HOW IT WORKS (white bg, py-20) ---
+
+Heading: "How AgriSakhi Works" centered, 32px bold dark green
+Kannada: "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ" below in gray
+
+Three steps in a row (desktop) / stacked (mobile):
+Each step card (white, shadow-md, rounded-2xl, p-6):
+
+  Step 1 — Register:
+    Icon: large circle (80px, green-100 bg) with 📱 emoji (40px)
+    Number badge: "01" top-right corner, small gray
+    Title: "Create Your Profile"
+    Description: "Sign up in 2 minutes. Choose your role — Farmer, Labour, or Service Provider."
+    Kannada: "2 ನಿಮಿಷದಲ್ಲಿ ನೋಂದಣಿ ಮಾಡಿ"
+
+  Step 2 — Discover:
+    Icon: 📍 (location pin, amber circle bg)
+    Title: "Find Nearby Opportunities"  
+    Description: "We use your GPS location to show jobs, workers, and services within your area."
+    Kannada: "ಹತ್ತಿರದ ಅವಕಾಶಗಳನ್ನು ಹುಡುಕಿ"
+
+  Step 3 — Connect:
+    Icon: 📞 (phone, blue circle bg)
+    Title: "Connect Directly"
+    Description: "Call or WhatsApp directly — no middlemen, no fees, no delays."
+    Kannada: "ನೇರವಾಗಿ ಸಂಪರ್ಕಿಸಿ"
+
+Connecting line between steps (desktop only):
+  A dashed line (border-dashed border-green-200) connecting step centers
+
+--- SECTION 3: ROLE CARDS (bg-green-50, py-20) ---
+
+Heading: "Who is AgriSakhi for?" centered
+
+3 role cards in a row (desktop) / stacked (mobile):
+Each card (white, rounded-2xl, shadow, p-8, hover:shadow-xl hover:-translate-y-1 transition):
+
+  FARMER card (border-t-4 border-green-500):
+    Top emoji: 🌾 (64px)
+    Title: "Farmers" / "ರೈತರು"
+    Feature list (✓ checkmarks, green):
+      ✓ Post job requirements
+      ✓ Find nearby labourers  
+      ✓ Discover agri services
+      ✓ Manage applications
+    CTA button: "Join as Farmer →" (green, full width)
+    → navigate to /register?role=farmer
+
+  LABOUR card (border-t-4 border-amber-500):
+    Top emoji: 👷 (64px)
+    Title: "Labourers" / "ಕೂಲಿ ಕಾರ್ಮಿಕರು"
+    Feature list (amber checkmarks):
+      ✓ Browse nearby jobs
+      ✓ See wage before applying
+      ✓ Contact farmer directly
+      ✓ Set daily availability
+    CTA: "Find Work →" (amber, full width)
+
+  PROVIDER card (border-t-4 border-blue-500):
+    Top emoji: 🚜 (64px)
+    Title: "Service Providers" / "ಸೇವಾ ಪೂರೈಕೆದಾರರು"
+    Feature list (blue checkmarks):
+      ✓ List your services
+      ✓ Set coverage area
+      ✓ Farmers find you
+      ✓ Manage enquiries
+    CTA: "List Services →" (blue, full width)
+
+--- SECTION 4: STATS BAR (bg-green-800, py-12) ---
+
+4 stats in a row (flex, centered, gap-8, wrap on mobile):
+Each stat (centered):
+  Number: "2000+" white, 40px bold
+  Label: "Registered Users" white/70, 14px
+  
+Stats: 2000+ Users | 500+ Jobs Posted | 50+ Services | 10+ Districts
+
+Dividers between stats (desktop): 1px white/20 vertical line
+
+--- SECTION 5: CTA FOOTER (same gradient as hero, py-16) ---
+
+Center:
+  "Ready to get started?" white 28px bold
+  "ಈಗಲೇ ಪ್ರಾರಂಭಿಸಿ" white/70 below
+  
+  Two buttons:
+  "Create Free Account" (white bg, green text, rounded-xl, px-8 py-4, text-lg)
+  "Login Instead →" (outlined white, rounded-xl, px-8 py-4)
+
+Below buttons: gray-300 text:
+  "Free to use · No subscription · Works on all phones"
+
+FOOTER BAR (very bottom, dark green/90):
+  Left: "© 2026 AgriSakhi · Karnataka"
+  Right: "1800-180-1551 · Kisan Helpline"
+
+--- ANIMATIONS ---
+Use framer-motion for:
+  - Hero text: initial={{opacity:0, y:30}} animate={{opacity:1, y:0}} transition={{duration:0.6}}
+  - Role buttons: initial={{opacity:0, x:-30}} animate={{opacity:1, x:0}} transition={{delay:0.4}}
+  - Step cards: whileInView={{opacity:1, y:0}} initial={{opacity:0, y:20}} viewport={{once:true}}
+  - Role cards: whileHover={{y:-4}} transition={{duration:0.2}}
+  - Stats: whileInView={{opacity:1}} initial={{opacity:0}} viewport={{once:true}}
+
+--- RESPONSIVE BREAKPOINTS ---
+Mobile (<640px): single column, stacked, full width sections
+Tablet (640-1024px): 2 columns where possible, reduced padding
+Desktop (>1024px): full two-column hero, 3-column grids, max-w-7xl mx-auto for content
+
+npm run build — 0 errors.
