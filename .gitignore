@@ -33,8 +33,15 @@ frontend/.vite
 
 venv/
 .env
+.env.*
+!.env.example
+agrisakhi_backend/.env
+frontend/.env
 __pycache__/
 *.pyc
 db.sqlite3
+*.sqlite3
+agrisakhi_backend/media/
+agrisakhi_backend/staticfiles/
 node_modules/
 dist/

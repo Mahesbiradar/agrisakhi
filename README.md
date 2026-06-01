@@ -113,7 +113,7 @@ agrisakhi/
 
 ### Backend
 
-**Requirements:** Python 3.11+, PostgreSQL
+**Requirements:** Python 3.11+
 
 ```bash
 cd agrisakhi_backend
@@ -131,12 +131,9 @@ cp .env.example .env
 ```env
 SECRET_KEY=your-secret-key
 DEBUG=True
-DB_NAME=agrisakhi
-DB_USER=postgres
-DB_PASSWORD=yourpassword
-DB_HOST=localhost
-DB_PORT=5432
-CORS_ORIGINS=http://localhost:5173
+DJANGO_PRODUCTION=False
+DATABASE_URL=
+CORS_ALLOWED_ORIGINS=http://localhost:5173
 
 # Optional — leave blank to use local filesystem storage
 CLOUDINARY_CLOUD_NAME=
@@ -208,13 +205,15 @@ npm run preview   # preview the production build
 
 ## Deployment
 
-**Backend — Railway**
+**Backend - Railway**
 
-The `agrisakhi_backend/railway.json` and `Procfile` configure Railway deployment. Set all env vars from `.env.example` in the Railway dashboard. The database should be a Railway-managed PostgreSQL instance.
+The `agrisakhi_backend/railway.json` and `Procfile` configure Railway deployment. Set the Railway service root to `agrisakhi_backend`, attach a Railway PostgreSQL database, and set env vars from `agrisakhi_backend/.env.example`.
 
-**Frontend — Netlify**
+**Frontend - Vercel**
 
-`netlify.toml` at the project root points to `frontend/` as the base with `npm run build` and `dist` as the publish directory. `public/_redirects` handles SPA fallback routing.
+`vercel.json` builds the `frontend/` Vite app from the monorepo root. Set `VITE_API_URL` to the Railway backend API URL, for example `https://your-backend.up.railway.app/api`.
+
+See `DEPLOYMENT.md` for the full local, Railway, and Vercel checklist.
 
 ## Development Notes
 

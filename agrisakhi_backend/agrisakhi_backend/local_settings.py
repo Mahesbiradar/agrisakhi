@@ -1,5 +1,6 @@
-from .settings import *  # noqa
 from pathlib import Path
+
+from .settings import *  # noqa
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -10,11 +11,13 @@ DATABASES = {
     }
 }
 
-# Override Cloudinary — use local filesystem for dev
-DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+STORAGES['default'] = {
+    'BACKEND': 'django.core.files.storage.FileSystemStorage',
+}
 
-# Remove cloudinary from installed apps for local dev
-INSTALLED_APPS = [app for app in INSTALLED_APPS
-                  if app not in ('cloudinary', 'cloudinary_storage')]
+INSTALLED_APPS = [
+    app for app in INSTALLED_APPS
+    if app not in ('cloudinary', 'cloudinary_storage')
+]
