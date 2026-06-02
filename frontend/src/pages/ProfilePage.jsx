@@ -11,6 +11,7 @@ import PageSkeleton from '../components/PageSkeleton.jsx'
 import useAuthStore from '../store/authStore.js'
 import { authAPI, jobsAPI, servicesAPI, usersAPI } from '../lib/api.js'
 import { useToast } from '../utils/useToast.js'
+import { detectLocation } from '../utils/location.js'
 
 const ROLE_GRADIENT = {
   farmer: 'from-green-600 via-emerald-600 to-green-500',
@@ -121,19 +122,33 @@ export default function ProfilePage() {
     ]
   }
 
-  const handleRefreshLocation = () => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        usersAPI.updateLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-          .then(() => {
-            updateUser({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-            showToast('Location updated')
-          })
-          .catch(() => showToast('Failed to update location'))
-      },
-      () => showToast('Could not get location'),
-    )
+  const handleRefreshLocation = async () => {
+  try {
+    const location = await detectLocation()
+
+    await usersAPI.updateLocation({
+      lat: location.lat,
+      lng: location.lng,
+      village: location.village,
+      district: location.district,
+    })
+
+    updateUser({
+      lat: location.lat,
+      lng: location.lng,
+      village: location.village,
+      district: location.district,
+    })
+
+    queryClient.invalidateQueries({
+      queryKey: ['profile'],
+    })
+
+    showToast('Location updated')
+  } catch {
+    showToast('Failed to update location')
   }
+}
 
   const handleSaveProfile = () => {
     if (!editName.trim()) return
