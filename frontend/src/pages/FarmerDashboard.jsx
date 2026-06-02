@@ -8,6 +8,7 @@ import PageSkeleton from '../components/PageSkeleton.jsx'
 import UserCard from '../components/UserCard.jsx'
 import useAuthStore from '../store/authStore.js'
 import { usersAPI, servicesAPI } from '../lib/api.js'
+import { detectLocation } from '../utils/location.js'
 
 const waveEmoji = '\u{1F44B}'
 const labourEmoji = '\u{1F477}'
@@ -30,19 +31,29 @@ export default function FarmerDashboard() {
   const updateUser = useAuthStore((s) => s.updateUser)
   const queryClient = useQueryClient()
 
-  const handleEnableLocation = () => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        usersAPI.updateLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-          .then(() => {
-            updateUser({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-            queryClient.invalidateQueries({ queryKey: ['nearby-labour'] })
-            queryClient.invalidateQueries({ queryKey: ['nearby-services'] })
-          })
-          .catch(() => {})
-      },
-      () => {},
-    )
+  const handleEnableLocation = async () => {
+    try {
+      const location = await detectLocation()
+
+      await usersAPI.updateLocation({
+        lat: location.lat,
+        lng: location.lng,
+        village: location.village,
+        district: location.district,
+      })
+
+      updateUser({
+        lat: location.lat,
+        lng: location.lng,
+        village: location.village,
+        district: location.district,
+      })
+
+      queryClient.invalidateQueries({ queryKey: ['nearby-labour'] })
+      queryClient.invalidateQueries({ queryKey: ['nearby-services'] })
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const { data: labourRes, isLoading: loadingLabour, isError: errLabour, refetch: refetchLabour } = useQuery({

@@ -7,6 +7,7 @@ import PhoneInput from '../components/PhoneInput.jsx'
 import { authAPI, usersAPI } from '../lib/api.js'
 import useAuthStore from '../store/authStore.js'
 import { getDashboardPath } from '../utils/auth.js'
+import { detectLocation } from '../utils/location.js'
 
 const rolePills = [
   { emoji: '🌾', label: 'Farmers' },
@@ -31,19 +32,28 @@ export default function LoginPage() {
     try {
       const res = await authAPI.login({ phone: phone.trim(), password })
       setAuth(res.data.user, res.data.access, res.data.refresh)
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          usersAPI.updateLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }).catch(() => {})
-        },
-        () => {},
+      try {
+        const location = await detectLocation()
+
+        usersAPI.updateLocation({
+          lat: location.lat,
+          lng: location.lng,
+          village: location.village,
+          district: location.district,
+        }).catch(() => {})
+      } catch {}
+
+      navigate(
+        getDashboardPath(res.data.user.role),
+        { replace: true }
       )
-      navigate(getDashboardPath(res.data.user.role), { replace: true })
     } catch (err) {
       setError(err.userMessage || t('invalidCreds'))
     } finally {
       setLoading(false)
     }
   }
+    
 
   return (
     <AuthLayout>

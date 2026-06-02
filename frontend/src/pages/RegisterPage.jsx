@@ -7,6 +7,7 @@ import PhoneInput from '../components/PhoneInput.jsx'
 import { authAPI } from '../lib/api.js'
 import useAuthStore from '../store/authStore.js'
 import { getDashboardPath } from '../utils/auth.js'
+import { detectLocation } from '../utils/location.js'
 
 const roleOptions = [
   { value: 'farmer', label: 'Farmer', emoji: '🌾', locationText: 'labourers and services' },
@@ -34,11 +35,11 @@ export default function RegisterPage() {
 
   const handleNext = (e) => { e.preventDefault(); setStep(2) }
 
-  const doRegister = async (lat, lng) => {
+  const doRegister = async (lat, lng, village = '',district = '') => {
     setSubmitting(true)
     setError('')
     try {
-      const res = await authAPI.register({ ...formData, lat, lng, village: '', district: '' })
+      const res = await authAPI.register({ ...formData, lat, lng,village,district, })
       setAuth(res.data.user, res.data.access, res.data.refresh)
       navigate(getDashboardPath(res.data.user.role), { replace: true })
     } catch (err) {
@@ -48,13 +49,22 @@ export default function RegisterPage() {
     }
   }
 
-  const handleAllowLocation = () => {
+  const handleAllowLocation = async () => {
+  try {
     setLocating(true)
-    navigator.geolocation.getCurrentPosition(
-      (pos) => doRegister(pos.coords.latitude, pos.coords.longitude),
-      () => doRegister(null, null),
+
+    const location = await detectLocation()
+
+    doRegister(
+      location.lat,
+      location.lng,
+      location.village,
+      location.district
     )
+  } catch {
+    doRegister(null, null, '', '')
   }
+}
 
   const handleSkipLocation = () => doRegister(null, null)
 
