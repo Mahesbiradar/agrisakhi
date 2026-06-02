@@ -54,7 +54,7 @@ class JobListCreateView(generics.ListCreateAPIView):
         min_wage = params.get('min_wage')
         district = params.get('district')
 
-        qs = Job.objects.select_related('farmer')
+        qs = Job.objects.filter(status='open').select_related('farmer')
         if work_type:
             qs = qs.filter(work_type=work_type)
         if district:
@@ -89,9 +89,21 @@ class JobListCreateView(generics.ListCreateAPIView):
         )
 
 
+from rest_framework.exceptions import PermissionDenied
+
 class JobDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Job.objects.select_related('farmer')
+    queryset = Job.objects.all()
     serializer_class = JobSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        obj = super().get_object()
+
+        if obj.status == 'closed':
+            if self.request.user != obj.farmer:
+                raise PermissionDenied('This job is closed.')
+
+        return obj
 
     def get_permissions(self):
         if self.request.method == 'GET':
