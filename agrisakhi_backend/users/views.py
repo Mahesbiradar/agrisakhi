@@ -108,10 +108,24 @@ class LocationUpdateView(APIView):
     def post(self, request):
         lat = request.data.get('lat')
         lng = request.data.get('lng')
+        village = request.data.get('village', '')
+        district = request.data.get('district', '')
+
         if lat and lng:
             request.user.lat = float(lat)
             request.user.lng = float(lng)
-            request.user.save(update_fields=['lat', 'lng'])
+            request.user.village = village
+            request.user.district = district
+
+            request.user.save(
+                update_fields=[
+                    'lat',
+                    'lng',
+                    'village',
+                    'district'
+                ]
+            )
+
         return Response({'status': 'location updated'})
 
 
