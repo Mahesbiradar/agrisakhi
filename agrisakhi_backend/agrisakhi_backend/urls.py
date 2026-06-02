@@ -9,6 +9,13 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 def health(request):
     return JsonResponse({'status': 'ok', 'message': 'AgriSakhi API is running'})
 
+def cloudinary_test(request):
+    return JsonResponse({
+        "cloud_name": settings.CLOUDINARY_CLOUD_NAME,
+        "api_key_exists": bool(settings.CLOUDINARY_API_KEY),
+        "api_secret_exists": bool(settings.CLOUDINARY_API_SECRET),
+    })
+
 
 urlpatterns = [
     path('api/health/', health),
@@ -19,6 +26,8 @@ urlpatterns = [
     path('api/users/', include('users.urls')),
     path('api/jobs/', include('jobs.urls')),
     path('api/services/', include('services.urls')),
+    path("api/cloudinary-test/", cloudinary_test),
+
 ]
 
 if settings.DEBUG:
